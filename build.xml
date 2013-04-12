@@ -2,75 +2,30 @@
 
 	<property file="build.properties" />
 
-
 	<target name="compile">
 		<delete dir="${build.dir}" />
 		<mkdir dir="${build.dir}" />
-		<mkdir dir="${build.dir}/hula-web" />
+		<mkdir dir="${build.dir}/classes" />
 
-		<!-- build hula-web -->
-		<javac destdir="${build.dir}/hula-web" debug="on">
+		<!-- compile hula-web source code -->
+		<javac destdir="${build.dir}/classes" debug="on">
 			<src path="src" />
 			<classpath>
-				<fileset dir="lib">
-					<include name="**/*" />
-				</fileset>
-				<fileset dir="${hula.lang.path}/lib">
-					<include name="**/*" />
-				</fileset>
-				<fileset dir="${hula.lang.path}/lib/dependencies">
-					<include name="**/*" />
-				</fileset>
+				<fileset dir="lib"/>
+				<fileset dir="${hula.lang.path}/lib"/>
+				<fileset dir="${hula.lang.path}/lib/dependencies"/>
 				<pathelement path="${platform.root}/lib/servlet-api.jar" />
 			</classpath>
 		</javac>
 
-		<jar destfile="${build.dir}/hula-web.jar" basedir="${build.dir}/hula-web" />
+		<!-- create hula-web jar -->
+		<jar destfile="${build.dir}/hula-web.jar" basedir="${build.dir}/classes" />
 	</target>
 
-
 	<target name="build" depends="compile">
-
-		<!-- Create the platform webapp -->
-		<delete dir="${build.dir}/platform/webapps" />
-		<mkdir dir="${build.dir}/platform/webapps" />
-		<copy todir="${build.dir}/platform/webapps/hula">
-			<fileset dir="resources">
-				<include name="**/*" />
-			</fileset>
-		</copy>
-
-		<!-- Copy in the jar files -->
-		<copy todir="${build.dir}/platform/webapps/hula/WEB-INF/lib">
-			<fileset dir="lib">
-				<include name="*.jar" />
-			</fileset>
-			<fileset dir="${hula.lang.path}/lib">
-				<include name="*.jar" />
-			</fileset>
-			<fileset dir="${hula.lang.path}/lib/dependencies">
-				<include name="*.jar" />
-			</fileset>
-			<fileset dir="build">
-				<include name="*.jar" />
-			</fileset>
-		</copy>
-
-		<!-- Copy in configuration files -->
-		<copy todir="${build.dir}/platform/webapps/hula/WEB-INF/classes">
-			<fileset dir="${hula.lang.path}/conf">
-				<include name="*.properties" />
-			</fileset>
-			<fileset dir="conf">
-				<include name="*.properties" />
-			</fileset>
-		</copy>
-
-
-		<war destfile="${build.dir}/platform/hula.war" webxml="resources/WEB-INF/web.xml">
-			<!--
-			<classes dir="${build.dir}/hula-web" />
-			-->
+		
+		<!-- create war file -->
+		<war destfile="${build.dir}/hula.war" webxml="resources/WEB-INF/web.xml">
 			<classes dir="conf" />
 			<classes dir="${hula.lang.path}/conf" />
 			<lib dir="lib" />
@@ -81,17 +36,8 @@
 			<webinf dir="resources/WEB-INF" includes="scripts/*"/>
 		</war>
 
-		<copy todir="${platform.root}/webapps" file="${build.dir}/platform/hula.war" />
-
-		<!-- Deploy the webapp 
-		<copy todir="${platform.root}/webapps/hula">
-			<fileset dir="${build.dir}/platform/webapps/hula">
-				<include name="**/"/>
-			</fileset>
-		</copy>
-		-->
-
-
+		<!-- copy to platform -->
+		<copy todir="${platform.root}/webapps" file="${build.dir}/hula.war" />
 	</target>
 
 </project>

@@ -16,8 +16,6 @@
 package com.hula.web.service.script;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -82,8 +80,18 @@ public class ScriptServiceImpl implements ScriptService
 	@Override
 	public boolean hasScript(String name)
 	{
-		File scriptFile = new File(getScriptPath(name));
-		return scriptFile.exists();
+		InputStream inputStream = FileUtil.getFileInputStream(getScriptPath(name));
+		
+		boolean result = (inputStream != null) ? true : false;
+		try
+		{
+			inputStream.close();
+		}
+		catch (IOException e)
+		{
+			// swallow - nothing we can do about this
+		}
+		return result;
 	}
 
 	@Override
@@ -143,10 +151,12 @@ public class ScriptServiceImpl implements ScriptService
 		Properties secureProperties = new Properties();
 
 		String path = scriptPath + "/secure.properties";
-		secureProperties.load(FileUtil.getFileInputStream(path));
-
+		
+		InputStream in = FileUtil.getFileInputStream(path);
+		secureProperties.load(in);
+		in.close();
+		
 		return secureProperties.containsKey(name + ".txt");
-
 	}
 
 	private String getScriptPath(String name)

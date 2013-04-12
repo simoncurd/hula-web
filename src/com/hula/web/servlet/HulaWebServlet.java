@@ -1,3 +1,18 @@
+/**
+ * Copyright 2013 Simon Curd <simoncurd@gmail.com>
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.hula.web.servlet;
 
 import java.io.IOException;
@@ -22,14 +37,12 @@ import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hula.lang.parser.HulaExecutable;
 import com.hula.lang.runtime.HulaContext;
 import com.hula.lang.runtime.HulaPlayer;
 import com.hula.lang.runtime.HulaPlayerImpl;
 import com.hula.web.WebConstants;
 import com.hula.web.model.RunResult;
-import com.hula.web.model.Script;
-import com.hula.web.model.WebHulaContext;
+import com.hula.web.model.HulaWebContext;
 import com.hula.web.model.runresult.ForwardRunResult;
 import com.hula.web.model.runresult.RedirectRunResult;
 import com.hula.web.model.runresult.ReturnContentRunResult;
@@ -40,27 +53,21 @@ import com.hula.web.util.ParameterUtil;
 import com.hula.web.util.SessionUtil;
 import com.hula.web.util.URLUtils;
 
-public class HulaServlet extends HttpServlet
+public class HulaWebServlet extends HttpServlet
 {
-	private static Logger logger = LoggerFactory.getLogger(HulaServlet.class);
+	private static Logger logger = LoggerFactory.getLogger(HulaWebServlet.class);
 	private ScriptService scriptService = null;
 
 	public void init(ServletConfig config) throws ServletException
 	{
-		logger.info("Slate Servlet init");
-
 		scriptService = ScriptServiceImpl.getInstance();
-
 		super.init(config);
 	}
 
 	protected String getRequestPath(HttpServletRequest request)
 	{
-		// String url = request.getRequestURL().toString();
 		String scriptName = request.getParameter("script");
 		String url = "/" + scriptName;
-
-		// url += "?" + request.getQueryString();
 		return url;
 	}
 
@@ -82,7 +89,7 @@ public class HulaServlet extends HttpServlet
 
 		logger.info("Execute Script [" + scriptName + "]");
 
-		WebHulaContext hctx = new WebHulaContext();
+		HulaWebContext hctx = new HulaWebContext();
 		buildHulaContext(request, response, hctx);
 
 		String urlString = getRequestPath(request);
@@ -122,7 +129,7 @@ public class HulaServlet extends HttpServlet
 		Quit, Continue;
 	}
 
-	protected PostRunAction runScript(String scriptName, WebHulaContext hctx, HttpServletRequest request, HttpServletResponse response) throws IOException
+	protected PostRunAction runScript(String scriptName, HulaWebContext hctx, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		try
 		{
@@ -170,7 +177,7 @@ public class HulaServlet extends HttpServlet
 
 	}
 
-	protected void returnContent(WebHulaContext hctx, HttpServletRequest request, HttpServletResponse response) throws IOException
+	protected void returnContent(HulaWebContext hctx, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		// result page holds the id of the content on the cctx to return
 
@@ -190,7 +197,7 @@ public class HulaServlet extends HttpServlet
 
 	}
 
-	protected void renderView(WebHulaContext hctx, HttpServletRequest request, HttpServletResponse response) throws IOException
+	protected void renderView(HulaWebContext hctx, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		ShowPageRunResult result = (ShowPageRunResult) hctx.getRunResult();
 
@@ -201,8 +208,6 @@ public class HulaServlet extends HttpServlet
 		}
 
 		// setup Velocity context
-
-		logger.info("Setup Velocity context...");
 		VelocityContext vctx = new VelocityContext();
 
 		vctx.put("datetool", new DateTool());
@@ -220,23 +225,22 @@ public class HulaServlet extends HttpServlet
 
 		// process Velocity template
 		PrintWriter out = response.getWriter();
-		logger.info("Render [" + resultPage + "]");
+		logger.info("render [" + resultPage + "]");
 
-		String myTemplateName = resultPage + ".vm";
-		logger.info("reading [" + myTemplateName + "]");
+		String templateName = resultPage + ".vm";
 
 		try
 		{
-			Template template = Velocity.getTemplate(myTemplateName);
+			Template template = Velocity.getTemplate(templateName);
 			template.merge(vctx, out);
 		}
 		catch (ResourceNotFoundException t)
 		{
-			throw new RuntimeException("Error finding page [" + myTemplateName + "]", t);
+			throw new RuntimeException("Error finding page [" + templateName + "]", t);
 		}
 		catch (ParseErrorException t)
 		{
-			throw new RuntimeException("Error parsing page [" + myTemplateName + "]", t);
+			throw new RuntimeException("Error parsing page [" + templateName + "]", t);
 		}
 
 	}
@@ -246,7 +250,7 @@ public class HulaServlet extends HttpServlet
 	 * 
 	 * @param cctx
 	 */
-	protected void saveSession(WebHulaContext hctx, HttpServletRequest request, HttpServletResponse response)
+	protected void saveSession(HulaWebContext hctx, HttpServletRequest request, HttpServletResponse response)
 	{
 		if (hctx.getSessionId() != null)
 		{
@@ -263,7 +267,7 @@ public class HulaServlet extends HttpServlet
 		}
 	}
 
-	private void processRedirect(WebHulaContext hctx, HttpServletRequest request, HttpServletResponse response, String script) throws IOException
+	private void processRedirect(HulaWebContext hctx, HttpServletRequest request, HttpServletResponse response, String script) throws IOException
 	{
 		RedirectRunResult redirectResult = (RedirectRunResult) hctx.getRunResult();
 		String url = URLUtils.getRedirectURL(redirectResult, request.getRequestURL().toString(), request.getServerName(), request.getServerPort());

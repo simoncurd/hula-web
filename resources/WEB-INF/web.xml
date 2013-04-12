@@ -44,34 +44,33 @@
     </env-entry>   	    
  	
     <env-entry>
-      <env-entry-name>velocityPath</env-entry-name>
+      <env-entry-name>pagePath</env-entry-name>
       <env-entry-type>java.lang.String</env-entry-type>
-      <!--<env-entry-value>../../../resources/pages</env-entry-value>-->
       <env-entry-value>../pages</env-entry-value>
     </env-entry>   	 
     
 	<filter>
-	   <filter-name>HulaFilter</filter-name>
-	   <filter-class>com.hula.web.filter.HulaFilter</filter-class>
+	   <filter-name>HulaWebFilter</filter-name>
+	   <filter-class>com.hula.web.filter.HulaWebFilter</filter-class>
 	</filter>
 
 
 	<filter-mapping>
-        <filter-name>HulaFilter</filter-name>
+        <filter-name>HulaWebFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
     <listener>
-        <listener-class>com.hula.web.listener.HulaContextListener</listener-class>
+        <listener-class>com.hula.web.listener.HulaWebContextListener</listener-class>
     </listener>
 
     <servlet>
-        <servlet-name>HulaServlet</servlet-name>
-        <servlet-class>com.hula.web.servlet.HulaServlet</servlet-class>
+        <servlet-name>HulaWebServlet</servlet-name>
+        <servlet-class>com.hula.web.servlet.HulaWebServlet</servlet-class>
     </servlet>
  
     <servlet-mapping>
-        <servlet-name>HulaServlet</servlet-name>
+        <servlet-name>HulaWebServlet</servlet-name>
         <url-pattern>/hula</url-pattern>
     </servlet-mapping>
     

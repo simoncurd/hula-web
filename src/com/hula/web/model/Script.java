@@ -16,7 +16,7 @@
 package com.hula.web.model;
 
 /**
- * A model object to hold the script to be executed
+ * A model object for a Hula script
  */
 public class Script
 {

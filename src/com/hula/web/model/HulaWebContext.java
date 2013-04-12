@@ -17,7 +17,10 @@ package com.hula.web.model;
 
 import com.hula.lang.runtime.HulaContext;
 
-public class WebHulaContext extends HulaContext
+/**
+ * Adds web-specific attributes to the HulaContext. 
+ */
+public class HulaWebContext extends HulaContext
 {
 	private String sessionId;
 	private RunResult runResult;
@@ -41,6 +44,4 @@ public class WebHulaContext extends HulaContext
 	{
 		this.runResult = runResult;
 	}
-	
-	
 }

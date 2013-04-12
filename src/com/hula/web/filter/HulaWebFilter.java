@@ -1,8 +1,20 @@
+/**
+ * Copyright 2013 Simon Curd <simoncurd@gmail.com>
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.hula.web.filter;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 
 import javax.servlet.Filter;
@@ -26,12 +38,9 @@ import com.hula.web.service.script.ScriptServiceImpl;
 import com.hula.web.service.script.exception.ScriptNotFoundException;
 import com.hula.web.service.script.exception.ScriptParseException;
 
-public class HulaFilter implements Filter
+public class HulaWebFilter implements Filter
 {
-	private static Logger logger = LoggerFactory.getLogger(HulaFilter.class);
-//
-//	public static String httpPort = null;
-//	public static String httpsPort = null;
+	private static Logger logger = LoggerFactory.getLogger(HulaWebFilter.class);
 
 	@Override
 	public void doFilter(ServletRequest baseRequest, ServletResponse baseResponse, FilterChain fc) throws IOException, ServletException
@@ -42,10 +51,8 @@ public class HulaFilter implements Filter
 		}
 		catch (Throwable t)
 		{
-			logger.error("error running filter", t);
 			throw new RuntimeException(t);
 		}
-
 	}
 
 	public void doFilter(ServletRequest baseRequest, ServletResponse baseResponse) throws IOException, ServletException
@@ -55,18 +62,16 @@ public class HulaFilter implements Filter
 
 		// /hula
 		String contextPath = request.getContextPath();
-		
+
 		// http://localhost:8080/hula/welcome
 		String requestURL = request.getRequestURL().toString();
 		int pos = requestURL.indexOf(contextPath) + contextPath.length() + 1;
-		
+
 		// welcome
 		String scriptName = requestURL.substring(pos, requestURL.length());
 
-		logger.info("");
 		logger.info("request [{}]", request.getRequestURL());
 
-		logger.info("context path [{}]", contextPath);
 		logger.info("script [{}]", scriptName);
 
 		// load the script
@@ -84,104 +89,77 @@ public class HulaFilter implements Filter
 		}
 		catch (ScriptParseException e)
 		{
-			//logger.error("error parsing script", e);
 			throw new RuntimeException("error parsing script", e);
 		}
 
 		// check if we need a channel switch
-		try
+		String redirectURL = getRedirectURL(script, request);
+		if (redirectURL != null)
 		{
-			checkRedirect(script, request);
-		}
-		catch (RedirectRequired e)
-		{
-			// if they're going to lose content, fail on this
-			if (!request.getParameterMap().isEmpty() && e.redirectURL.indexOf('?') == -1)
+			// if channel switch will lose content, raise a warning
+			if (!request.getParameterMap().isEmpty() && redirectURL.indexOf('?') == -1)
 			{
-				throw new RuntimeException("A change of channel was attempted (http/https) was requested, however the parameters on the target URL will be lost");
+				logger.warn("A change of channel was required, however the parameters on the target URL will be lost");
 			}
 
-			response.sendRedirect(e.redirectURL);
+			response.sendRedirect(redirectURL);
 			return;
 		}
 
 		// forward to the servlet
-		logger.info("Run Script [{}]", scriptName);
 		RequestDispatcher rd = request.getRequestDispatcher("/hula?script=" + scriptName);
 		rd.forward(baseRequest, baseResponse);
 
 		return;
 	}
-	
 
-
-	protected void checkRedirect(Script script, HttpServletRequest request) throws RedirectRequired
+	protected String getRedirectURL(Script script, HttpServletRequest request)
 	{
 		String url = request.getRequestURL().toString().toLowerCase();
-		
-		ServletContext sctx = request.getServletContext();
-		String httpPort = (String)sctx.getAttribute(WebConstants.httpPort);
-		String httpsPort = (String)sctx.getAttribute(WebConstants.httpsPort);
-
-		String queryParameters = "";
-		if (request.getQueryString() != null)
-		{
-			queryParameters = "?" + request.getQueryString();
-		}
 
 		boolean usingSecureChannel = url.startsWith("https://");
 
-		if (script.isSecure() && !usingSecureChannel)
+		// if secure status matches, no channel switch is required
+		if (script.isSecure() == usingSecureChannel)
+		{
+			return null;
+		}
+
+		ServletContext sctx = request.getServletContext();
+		String httpPort = (String) sctx.getAttribute(WebConstants.httpPort);
+		String httpsPort = (String) sctx.getAttribute(WebConstants.httpsPort);
+
+		if (script.isSecure())
 		{
 			url = url.replace("http://", "https://");
 			if (!httpPort.equals("80"))
 			{
 				url = url.replace(":" + httpPort + "/", ":" + httpsPort + "/");
 			}
-			url += queryParameters;
-
-			throw new RedirectRequired(url);
 		}
-		else if (!script.isSecure() && usingSecureChannel)
+		else
 		{
 			url = url.replace("https://", "http://");
 			if (!httpPort.equals("80"))
 			{
 				url = url.replace(":" + httpsPort + "/", ":" + httpPort + "/");
 			}
-			url += queryParameters;
-
-			throw new RedirectRequired(url);
 		}
-	}
-
-	class RedirectRequired extends Exception
-	{
-		private String redirectURL;
-
-		RedirectRequired(String redirectURL)
+		if (request.getQueryString() != null)
 		{
-			this.redirectURL = redirectURL;
+			url += "?" + request.getQueryString();
 		}
+		return url;
 	}
 
-
-	//
-	// Filter Lifecycle methods
-	//
 
 	@Override
 	public void init(FilterConfig fc) throws ServletException
 	{
-		logger.info("Filter Setup");
-		
-
-		logger.info("Filter Setup - complete");
 	}
 
 	@Override
 	public void destroy()
 	{
-		logger.info("Filter Destroy");
 	}
 }
