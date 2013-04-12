@@ -1,0 +1,12 @@
+
+# ignore eclipse-generated binary directory
+bin
+
+# ignore ant-generated build directory
+build
+
+# ignore the eclipse workspace directory
+.metadata
+
+platform
+

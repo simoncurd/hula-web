@@ -1,0 +1,10 @@
+
+Echo "Welcome"
+
+#Set name="Jeff"
+
+Call test
+
+#DoSomething unexpected
+
+SetView welcome

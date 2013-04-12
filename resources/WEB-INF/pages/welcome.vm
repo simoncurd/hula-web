@@ -1,0 +1,8 @@
+
+#decorate("layout.vm")
+
+	<h1>Welcome from Hula to you, $name</h1>
+	
+	<a href="login">Login Here</a>
+
+#end

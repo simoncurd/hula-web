@@ -1,0 +1,4 @@
+
+Echo "test script!"
+
+Set name="Simon"

@@ -1,0 +1,3 @@
+Echo "this is a secure page"
+
+SetView login
