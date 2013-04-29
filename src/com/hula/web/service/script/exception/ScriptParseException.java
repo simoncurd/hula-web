@@ -15,12 +15,16 @@
  */
 package com.hula.web.service.script.exception;
 
+/**
+ * Indicates an error occured parsing the script
+ */
 public class ScriptParseException extends Exception
 {
 	public ScriptParseException()
 	{
 		super();
 	}
+
 	public ScriptParseException(Exception e)
 	{
 		super(e);

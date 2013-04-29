@@ -15,6 +15,8 @@
  */
 package com.hula.web.filter;
 
+import gumi.builders.UrlBuilder;
+
 import java.io.IOException;
 
 import javax.servlet.Filter;
@@ -31,51 +33,42 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Injector;
 import com.hula.web.WebConstants;
 import com.hula.web.model.Script;
 import com.hula.web.service.script.ScriptService;
-import com.hula.web.service.script.ScriptServiceImpl;
 import com.hula.web.service.script.exception.ScriptNotFoundException;
 import com.hula.web.service.script.exception.ScriptParseException;
+import com.hula.web.util.URLUtils;
 
+/**
+ * Filter responsible for recognising Hula requests, as well as channel switching
+ * between secure/non-secure URLs
+ */
 public class HulaWebFilter implements Filter
 {
 	private static Logger logger = LoggerFactory.getLogger(HulaWebFilter.class);
 
+	private String httpPort = null;
+	private String httpsPort = null;
+	
+	private ScriptService scriptService = null;
+
 	@Override
 	public void doFilter(ServletRequest baseRequest, ServletResponse baseResponse, FilterChain fc) throws IOException, ServletException
-	{
-		try
-		{
-			doFilter(baseRequest, baseResponse);
-		}
-		catch (Throwable t)
-		{
-			throw new RuntimeException(t);
-		}
-	}
-
-	public void doFilter(ServletRequest baseRequest, ServletResponse baseResponse) throws IOException, ServletException
 	{
 		HttpServletRequest request = (HttpServletRequest) baseRequest;
 		HttpServletResponse response = (HttpServletResponse) baseResponse;
 
-		// /hula
-		String contextPath = request.getContextPath();
-
-		// http://localhost:8080/hula/welcome
 		String requestURL = request.getRequestURL().toString();
-		int pos = requestURL.indexOf(contextPath) + contextPath.length() + 1;
+		logger.info("request [{}]", requestURL);
 
-		// welcome
-		String scriptName = requestURL.substring(pos, requestURL.length());
-
-		logger.info("request [{}]", request.getRequestURL());
-
+		String contextPath = request.getContextPath();
+		String scriptName = URLUtils.getScriptName(requestURL, contextPath);
 		logger.info("script [{}]", scriptName);
 
 		// load the script
-		ScriptService scriptService = ScriptServiceImpl.getInstance();
+		//ScriptService scriptService = ScriptServiceImpl.getInstance();
 		Script script = null;
 		try
 		{
@@ -92,70 +85,67 @@ public class HulaWebFilter implements Filter
 			throw new RuntimeException("error parsing script", e);
 		}
 
-		// check if we need a channel switch
-		String redirectURL = getRedirectURL(script, request);
-		if (redirectURL != null)
+		// check if we need to switch channel
+		String alternativeChannelURL = getAlternativeChannelURL(script, request);
+		if (alternativeChannelURL != null)
 		{
-			// if channel switch will lose content, raise a warning
-			if (!request.getParameterMap().isEmpty() && redirectURL.indexOf('?') == -1)
-			{
-				logger.warn("A change of channel was required, however the parameters on the target URL will be lost");
-			}
 
-			response.sendRedirect(redirectURL);
+			logger.info("redirecting to [" + alternativeChannelURL + "]");
+			response.sendRedirect(alternativeChannelURL);
 			return;
 		}
 
 		// forward to the servlet
-		RequestDispatcher rd = request.getRequestDispatcher("/hula?script=" + scriptName);
+		RequestDispatcher rd = request.getRequestDispatcher("/exec?script=" + scriptName);
 		rd.forward(baseRequest, baseResponse);
-
-		return;
 	}
 
-	protected String getRedirectURL(Script script, HttpServletRequest request)
+	/**
+	 * Check if we need to switch channel, and return the redirection URL.
+	 * 
+	 * @param script The script to be executed
+	 * @param request The incoming request
+	 * @return URL to redirect to, or null if not required
+	 */
+	protected String getAlternativeChannelURL(Script script, HttpServletRequest request)
 	{
 		String url = request.getRequestURL().toString().toLowerCase();
-
-		boolean usingSecureChannel = url.startsWith("https://");
+		UrlBuilder urlBuilder = UrlBuilder.fromString(url);
 
 		// if secure status matches, no channel switch is required
-		if (script.isSecure() == usingSecureChannel)
+		if (script.isSecure() == urlBuilder.scheme.equals("https"))
 		{
 			return null;
 		}
 
-		ServletContext sctx = request.getServletContext();
-		String httpPort = (String) sctx.getAttribute(WebConstants.httpPort);
-		String httpsPort = (String) sctx.getAttribute(WebConstants.httpsPort);
-
+		// rewrite URL
 		if (script.isSecure())
 		{
-			url = url.replace("http://", "https://");
-			if (!httpPort.equals("80"))
-			{
-				url = url.replace(":" + httpPort + "/", ":" + httpsPort + "/");
-			}
+			urlBuilder = urlBuilder.withScheme("https").withPort(new Integer(httpsPort));
 		}
 		else
 		{
-			url = url.replace("https://", "http://");
-			if (!httpPort.equals("80"))
-			{
-				url = url.replace(":" + httpsPort + "/", ":" + httpPort + "/");
-			}
+			urlBuilder = urlBuilder.withScheme("http").withPort(new Integer(httpPort));
 		}
-		if (request.getQueryString() != null)
-		{
-			url += "?" + request.getQueryString();
-		}
-		return url;
-	}
 
+		// don't need to specify default port values
+		if (urlBuilder.port == 80 || urlBuilder.port == 443)
+		{
+			urlBuilder = urlBuilder.withPort(null);
+		}
+
+		return urlBuilder.toString();
+	}
 
 	@Override
 	public void init(FilterConfig fc) throws ServletException
 	{
+		ServletContext sctx = fc.getServletContext();
+		this.httpPort = (String) sctx.getAttribute(WebConstants.httpPort);
+		this.httpsPort = (String) sctx.getAttribute(WebConstants.httpsPort);
+		
+		Injector injector = (Injector)sctx.getAttribute(WebConstants.Injector);
+		scriptService = injector.getInstance(ScriptService.class);
 	}
 
 	@Override

@@ -1,0 +1,16 @@
+Echo "name is $name"
+
+GetSession as session
+OnFail
+	Echo "error getting session"
+End
+
+Echo "session: $session"
+Set $session.username=$name
+
+#AddToMap $session, key=username, value=$name
+Echo "session: $session"
+
+SaveSession
+
+Echo "finished!"

@@ -24,17 +24,11 @@
       <env-entry-type>java.lang.String</env-entry-type>
       <env-entry-value>platform404.vm</env-entry-value>
     </env-entry>        
-
-    <env-entry>
-      <env-entry-name>scriptPath</env-entry-name>
-      <env-entry-type>java.lang.String</env-entry-type>
-      <env-entry-value>../scripts</env-entry-value>
-    </env-entry>   	
     
     <env-entry>
       <env-entry-name>commandPath</env-entry-name>
       <env-entry-type>java.lang.String</env-entry-type>
-      <env-entry-value>../webapps/hula/WEB-INF/classes/</env-entry-value>
+      <env-entry-value></env-entry-value>
     </env-entry>   	    
  	
     <env-entry>
@@ -42,6 +36,12 @@
       <env-entry-type>java.lang.String</env-entry-type>
       <env-entry-value>lang,web</env-entry-value>
     </env-entry>   	    
+ 	
+    <env-entry>
+      <env-entry-name>scriptPath</env-entry-name>
+      <env-entry-type>java.lang.String</env-entry-type>
+      <env-entry-value>../scripts</env-entry-value>
+    </env-entry>   	
  	
     <env-entry>
       <env-entry-name>pagePath</env-entry-name>
@@ -71,7 +71,7 @@
  
     <servlet-mapping>
         <servlet-name>HulaWebServlet</servlet-name>
-        <url-pattern>/hula</url-pattern>
+        <url-pattern>/exec</url-pattern>
     </servlet-mapping>
     
 

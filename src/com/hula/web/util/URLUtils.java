@@ -15,97 +15,76 @@
  */
 package com.hula.web.util;
 
+import gumi.builders.UrlBuilder;
+
 import java.util.Map;
 
 import com.hula.web.model.runresult.RedirectRunResult;
 
+/**
+ * Utility class with methods for working with URLs
+ */
 public class URLUtils
 {
 	/**
 	 * Build an absolute URL for redirection
-	 *  
-	 * @param redirectRunResult The {@link RedirectRunResult} 
+	 * 
+	 * @param redirectRunResult The {@link RedirectRunResult} containing redirect requirements
 	 * @param requestURL The current request URL
-	 * @param serverName The server name
-	 * @param serverPort The server port
 	 * @return the redirect URL
 	 */
-	public static String getRedirectURL(RedirectRunResult redirectRunResult, String requestURL, String serverName, int serverPort)
+	public static String getRedirectURL(RedirectRunResult redirectRunResult, String requestURL, String context)
 	{
-		String target = redirectRunResult.getAction();
+		String target = redirectRunResult.getTarget();
 
-		String url = null;
+		UrlBuilder url = UrlBuilder.fromString(requestURL);
 
-		// target script is a fully-qualified URL
 		if (target.startsWith("http"))
 		{
-			url = target;
+			// target script is a fully-qualified URL
+			url = UrlBuilder.fromString(target);
 		}
-
-		// target script is an action
 		else
 		{
-
-			String path = "/" + target;
-
-			// grab the protocol
-			url = requestURL.substring(0, requestURL.indexOf(':')) + "://";
-
-			// append the hostname
-			url += serverName;
-
-			// append the port (if necessary)
-			if (serverPort != 80 && serverPort != 443)
-			{
-				url += ":" + serverPort;
-			}
-			// append the path
-			url += path;
-
+			// target script is an action
+			url = url.withPath(context + "/" + target);
 		}
 
 		// append any new parameters
-		String queryString = createQueryString(redirectRunResult.getParameters());
-		if (queryString != null && !queryString.equals(""))
+		Map<String, String> parameters = redirectRunResult.getParameters();
+		if (parameters != null)
 		{
-
-			if (url.indexOf("?") == -1)
+			for (String key : parameters.keySet())
 			{
-				url += "?";
+				String value = parameters.get(key);
+				url = url.addParameter(key, value);
 			}
-			else
-			{
-				url += "&";
-			}
-
-			url += queryString;
 		}
 
-
-		return url;
+		return url.toString();
 	}
-	
 
-	public static String createQueryString(Map<String,String[]> parameters)
+	/**
+	 * Extract the script name from a URL
+	 * 
+	 * @param requestURL The URL to inspect
+	 * @param contextPath The context path of the current web application
+	 * @return the name of the script
+	 */
+	public static String getScriptName(String requestURL, String contextPath)
 	{
-		String result = "";
-		for (String key : parameters.keySet())
+		UrlBuilder ub = UrlBuilder.fromString(requestURL);
+
+		String scriptName = ub.path;
+
+		// strip off the context
+		if (contextPath != null && !contextPath.equals(""))
 		{
-			String[] values = parameters.get(key);
-			String value = values[0];
-			if (values.length > 1)
-			{
-				for (int index =1 ; index != values.length; index++)
-				{
-					value += "," + values[index];
-				}
-			}
-			if (result.length() > 0)
-			{
-				result += "&";
-			}
-			result += key + "=" + value;
+			scriptName = scriptName.substring(contextPath.length());
 		}
-		return result;
+
+		// strip off the leading forward-slash
+		return scriptName.substring(1);
 	}
+
 }

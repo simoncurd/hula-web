@@ -17,23 +17,28 @@ package com.hula.web.model.runresult;
 
 import com.hula.web.model.RunResult;
 
+/**
+ * RunResult indicating that a content-based response is required. <br/>
+ * 
+ * See also {@link com.hula.web.commands.results.ReturnContent}
+ */
 public class ReturnContentRunResult implements RunResult
 {
-	private String contentId;
+	private Object content;
 
-	public ReturnContentRunResult(String contentId)
+	public ReturnContentRunResult(Object content)
 	{
-		this.contentId = contentId;
+		this.content = content;
 	}
 
-	public String getContentId()
+	public Object getContent()
 	{
-		return contentId;
+		return content;
 	}
 
-	public void setContentId(String contentId)
+	public void setContent(Object content)
 	{
-		this.contentId = contentId;
+		this.content = content;
 	}
 
 }

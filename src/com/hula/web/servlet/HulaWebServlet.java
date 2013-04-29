@@ -16,70 +16,58 @@
 package com.hula.web.servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
-import org.apache.velocity.exception.ParseErrorException;
-import org.apache.velocity.exception.ResourceNotFoundException;
-import org.apache.velocity.tools.generic.DateTool;
-import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hula.lang.runtime.HulaContext;
+import com.google.inject.Injector;
 import com.hula.lang.runtime.HulaPlayer;
 import com.hula.lang.runtime.HulaPlayerImpl;
+import com.hula.lang.runtime.ServiceProxy;
 import com.hula.web.WebConstants;
-import com.hula.web.model.RunResult;
 import com.hula.web.model.HulaWebContext;
+import com.hula.web.model.RunResult;
 import com.hula.web.model.runresult.ForwardRunResult;
-import com.hula.web.model.runresult.RedirectRunResult;
-import com.hula.web.model.runresult.ReturnContentRunResult;
-import com.hula.web.model.runresult.ShowPageRunResult;
+import com.hula.web.response.ResponseProcessor;
+import com.hula.web.runtime.GuiceServiceProxy;
+import com.hula.web.runtime.ResponseProcessorMapping;
 import com.hula.web.service.script.ScriptService;
-import com.hula.web.service.script.ScriptServiceImpl;
-import com.hula.web.util.ParameterUtil;
-import com.hula.web.util.SessionUtil;
-import com.hula.web.util.URLUtils;
+import com.hula.web.util.ParameterUtils;
 
+/**
+ * Servlet responsible for executing Hula scripts and processing the
+ * response.
+ */
 public class HulaWebServlet extends HttpServlet
 {
 	private static Logger logger = LoggerFactory.getLogger(HulaWebServlet.class);
 	private ScriptService scriptService = null;
+	private ServiceProxy serviceProxy = null;
 
-	public void init(ServletConfig config) throws ServletException
-	{
-		scriptService = ScriptServiceImpl.getInstance();
-		super.init(config);
-	}
+	// alternative strategies for processing responses
+	private ResponseProcessorMapping responseProcessors;
 
-	protected String getRequestPath(HttpServletRequest request)
-	{
-		String scriptName = request.getParameter("script");
-		String url = "/" + scriptName;
-		return url;
-	}
-
+	/**
+	 * Handle the incoming request
+	 * 
+	 * @param request The request to handle
+	 * @param response The response object
+	 * @throws IOException
+	 * @throws ServletException
+	 */
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
-		logger.info("request URL [" + request.getRequestURL() + "]");
-		String requestURL = request.getRequestURL().toString();
-
-		// setup the page
-		response.setContentType("text/html");
-
-		// where a parameter is on the request...
+		// lookup the script to run
 		String scriptName = request.getParameter("script");
 
 		if (scriptName == null || scriptName.trim().equals(""))
@@ -87,54 +75,66 @@ public class HulaWebServlet extends HttpServlet
 			scriptName = "default";
 		}
 
-		logger.info("Execute Script [" + scriptName + "]");
+		logger.info("execute [" + scriptName + "]");
 
+		// setup context
 		HulaWebContext hctx = new HulaWebContext();
-		buildHulaContext(request, response, hctx);
+		hctx.setRequest(request);
+		hctx.setResponse(response);
 
-		String urlString = getRequestPath(request);
-
-		hctx.setParameter(WebConstants.URI, urlString);
+		Map<String, Object> requestParameters = ParameterUtils.convertParameterMap(request.getParameterMap());
+		hctx.getParameters().putAll(requestParameters);
 		hctx.setParameter(WebConstants.ScriptName, scriptName);
-
-		// lookup the session identifier from the cookies
-		if (SessionUtil.hasSessionIdentifier(request))
-		{
-			hctx.setSessionId(SessionUtil.getSessionIdentifier(request));
-		}
 
 		// build a list of scripts to execute
 		List<String> scripts = new ArrayList<String>();
-
 		if (scriptService.hasScript("common"))
 		{
 			scripts.add("common");
 		}
 		scripts.add(scriptName);
 
+		// execute scripts
 		for (String scriptItem : scripts)
 		{
-			PostRunAction action = runScript(scriptItem, hctx, request, response);
+			RunResult runResult = runScript(scriptItem, hctx, request, response);
 			logger.info("script [" + scriptItem + "] finished");
-			if (action.equals(PostRunAction.Quit))
+
+			if (runResult != null)
 			{
-				break;
+				if (runResult instanceof ForwardRunResult)
+				{
+					ForwardRunResult fwd = (ForwardRunResult) hctx.getRunResult();
+					this.runScript(fwd.getScriptName(), hctx, request, response);
+					return;
+				}
+				else
+				{
+					ResponseProcessor processor = responseProcessors.getResponseProcessor(runResult);
+					processor.process(hctx, request, response);
+					return;
+				}
 			}
 		}
 
 	}
 
-	enum PostRunAction
-	{
-		Quit, Continue;
-	}
-
-	protected PostRunAction runScript(String scriptName, HulaWebContext hctx, HttpServletRequest request, HttpServletResponse response) throws IOException
+	/**
+	 * Run the Hula script and return the {@link com.hula.web.model.RunResult}
+	 * 
+	 * @param scriptName The script to execute
+	 * @param hulaWebContext The context for the script
+	 * @param request The request
+	 * @param response The response
+	 * @return The RunResult from the script
+	 * @throws IOException
+	 */
+	protected RunResult runScript(String scriptName, HulaWebContext hulaWebContext, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		try
 		{
-			HulaPlayer player = new HulaPlayerImpl(scriptService);
-			player.run(scriptName, hctx);
+			HulaPlayer player = new HulaPlayerImpl(scriptService, serviceProxy);
+			player.run(scriptName, hulaWebContext);
 		}
 		catch (Throwable e)
 		{
@@ -142,151 +142,7 @@ public class HulaWebServlet extends HttpServlet
 			throw new RuntimeException(e);
 		}
 
-		// need to save sessionId if one has been created
-		saveSession(hctx, request, response);
-
-		if (hctx.getRunResult() != null)
-		{
-			RunResult runResult = hctx.getRunResult();
-
-			if (runResult instanceof RedirectRunResult)
-			{
-				// process redirect
-				RedirectRunResult res = (RedirectRunResult) hctx.getRunResult();
-				processRedirect(hctx, request, response, res.getAction());
-				return PostRunAction.Quit;
-			}
-			else if (runResult instanceof ShowPageRunResult)
-			{
-				renderView(hctx, request, response);
-				return PostRunAction.Quit;
-			}
-			else if (runResult instanceof ReturnContentRunResult)
-			{
-				returnContent(hctx, request, response);
-				return PostRunAction.Quit;
-			}
-			else if (runResult instanceof ForwardRunResult)
-			{
-				ForwardRunResult fwd = (ForwardRunResult) hctx.getRunResult();
-				return this.runScript(fwd.getScriptName(), hctx, request, response);
-			}
-		}
-
-		return PostRunAction.Continue;
-
-	}
-
-	protected void returnContent(HulaWebContext hctx, HttpServletRequest request, HttpServletResponse response) throws IOException
-	{
-		// result page holds the id of the content on the cctx to return
-
-		ReturnContentRunResult result = (ReturnContentRunResult) hctx.getRunResult();
-		String resultId = result.getContentId();
-		logger.info("Return contents of var [" + resultId + "]");
-
-		Object o = hctx.getParameter(resultId);
-		logger.info("Return content type [" + o.getClass().getSimpleName() + "]");
-
-		if (o instanceof String)
-		{
-			logger.info("Return content [" + o.toString() + "]");
-			PrintWriter out = response.getWriter();
-			out.write(o.toString());
-		}
-
-	}
-
-	protected void renderView(HulaWebContext hctx, HttpServletRequest request, HttpServletResponse response) throws IOException
-	{
-		ShowPageRunResult result = (ShowPageRunResult) hctx.getRunResult();
-
-		String resultPage = result.getPageName();
-		if (resultPage == null)
-		{
-			resultPage = "default";
-		}
-
-		// setup Velocity context
-		VelocityContext vctx = new VelocityContext();
-
-		vctx.put("datetool", new DateTool());
-		vctx.put("numbertool", new NumberTool());
-
-		for (String id : hctx.getParameters().keySet())
-		{
-			Object value = hctx.getParameters().get(id);
-			logger.info("--- Copying [" + id + "] value [" + value + "] to context");
-			vctx.put(id, value);
-		}
-
-		// put the session onto the velocity context
-		vctx.put("session", request.getSession());
-
-		// process Velocity template
-		PrintWriter out = response.getWriter();
-		logger.info("render [" + resultPage + "]");
-
-		String templateName = resultPage + ".vm";
-
-		try
-		{
-			Template template = Velocity.getTemplate(templateName);
-			template.merge(vctx, out);
-		}
-		catch (ResourceNotFoundException t)
-		{
-			throw new RuntimeException("Error finding page [" + templateName + "]", t);
-		}
-		catch (ParseErrorException t)
-		{
-			throw new RuntimeException("Error parsing page [" + templateName + "]", t);
-		}
-
-	}
-
-	/**
-	 * need to save sessionId if one has been created
-	 * 
-	 * @param cctx
-	 */
-	protected void saveSession(HulaWebContext hctx, HttpServletRequest request, HttpServletResponse response)
-	{
-		if (hctx.getSessionId() != null)
-		{
-			SessionUtil.setSessionIdentifier(response, hctx.getSessionId());
-		}
-		else
-		{
-			// the sessionId has been removed from the context, so lets remove it
-			// from the browser
-			if (SessionUtil.hasSessionIdentifier(request))
-			{
-				SessionUtil.removeSessionIdentifier(response);
-			}
-		}
-	}
-
-	private void processRedirect(HulaWebContext hctx, HttpServletRequest request, HttpServletResponse response, String script) throws IOException
-	{
-		RedirectRunResult redirectResult = (RedirectRunResult) hctx.getRunResult();
-		String url = URLUtils.getRedirectURL(redirectResult, request.getRequestURL().toString(), request.getServerName(), request.getServerPort());
-		response.sendRedirect(url);
-	}
-
-	private void buildHulaContext(HttpServletRequest request, HttpServletResponse response, HulaContext hctx)
-	{
-		Map<String, String[]> params = request.getParameterMap();
-
-		Map<String, String> convertedParams = ParameterUtil.convertParameterMap(params);
-		for (String id : convertedParams.keySet())
-		{
-			String value = convertedParams.get(id);
-			logger.info("--- Copying [" + id + "] value [" + value + "]");
-			hctx.setParameter(id, value);
-		}
-
-		// hctx.setRuntimeAdapter(new WebRequestEnvironmentAdapterImpl(request, response));
+		return hulaWebContext.getRunResult();
 	}
 
 	@Override
@@ -299,5 +155,21 @@ public class HulaWebServlet extends HttpServlet
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
 		handleRequest(request, response);
+	}
+
+	/**
+	 * Initialise the servlet to execute Hula scripts
+	 */
+	public void init(ServletConfig config) throws ServletException
+	{
+		ServletContext sctx = config.getServletContext();
+		Injector injector = (Injector) sctx.getAttribute(WebConstants.Injector);
+		scriptService = injector.getInstance(ScriptService.class);
+
+		this.serviceProxy = new GuiceServiceProxy(injector);
+
+		this.responseProcessors = injector.getInstance(ResponseProcessorMapping.class);
+
+		super.init(config);
 	}
 }

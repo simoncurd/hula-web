@@ -2,7 +2,7 @@
 
 	<property file="build.properties" />
 
-	<target name="compile">
+	<target name="build">
 		<delete dir="${build.dir}" />
 		<mkdir dir="${build.dir}" />
 		<mkdir dir="${build.dir}/classes" />
@@ -20,12 +20,9 @@
 
 		<!-- create hula-web jar -->
 		<jar destfile="${build.dir}/hula-web.jar" basedir="${build.dir}/classes" />
-	</target>
-
-	<target name="build" depends="compile">
-		
+			
 		<!-- create war file -->
-		<war destfile="${build.dir}/hula.war" webxml="resources/WEB-INF/web.xml">
+		<war destfile="${release.dir}/${war.name}" webxml="resources/WEB-INF/web.xml">
 			<classes dir="conf" />
 			<classes dir="${hula.lang.path}/conf" />
 			<lib dir="lib" />
@@ -35,9 +32,29 @@
 			<webinf dir="resources/WEB-INF" includes="pages/*"/>
 			<webinf dir="resources/WEB-INF" includes="scripts/*"/>
 		</war>
+		
+	</target>
+
+	<target name="deploy" depends="build">
 
 		<!-- copy to platform -->
-		<copy todir="${platform.root}/webapps" file="${build.dir}/hula.war" />
+		<copy todir="${platform.root}/webapps" file="${release.dir}/${war.name}" />
 	</target>
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="generate-docs">
+		<javadoc sourcepath="src" destdir="../hula-web-pages/javadoc">
+			<classpath>
+				<fileset dir="lib" />
+				<fileset dir="${hula.lang.path}/lib"/>
+				<fileset dir="${hula.lang.path}/lib/dependencies"/>
+				<pathelement path="${platform.root}/lib/servlet-api.jar" />
+			</classpath>
+		</javadoc>
+	</target>	
 
 </project>

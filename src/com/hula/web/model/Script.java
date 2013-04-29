@@ -23,30 +23,35 @@ public class Script
 	private String name;
 	private boolean secure;
 	private String content;
-	
+
 	public String getName()
 	{
 		return name;
 	}
+
 	public void setName(String name)
 	{
 		this.name = name;
 	}
+
 	public boolean isSecure()
 	{
 		return secure;
 	}
+
 	public void setSecure(boolean secure)
 	{
 		this.secure = secure;
 	}
+
 	public String getContent()
 	{
 		return content;
 	}
+
 	public void setContent(String content)
 	{
 		this.content = content;
 	}
-	
+
 }

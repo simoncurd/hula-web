@@ -1,1 +1,5 @@
 Echo "this is common file"
+
+If $h_ScriptName = "alt"
+	Forward alt2
+End

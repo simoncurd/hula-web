@@ -30,16 +30,20 @@ import com.hula.web.model.HulaWebContext;
 import com.hula.web.model.runresult.RedirectRunResult;
 
 /**
- * Redirects the request onto another action, without returning. <br/><br/>
+ * Redirects the request onto another action, without returning. <br/>
+ * <br/>
  * 
- * Example Usage: <br/><br/>
+ * Example Usage: <br/>
+ * <br/>
  * 
  * Redirect from the current Hula script to a Hula script called "login"<br/>
+ * 
  * <pre>
  * Redirect login
  * </pre>
  * 
- * Redirect to the login Hula script, passing some parameters on the request
+ * Redirect to the login Hula script, passing some parameters on the request<br/>
+ * 
  * <pre>
  * Redirect login, user=jeff@hula-lang.org, message=please.login
  * </pre>
@@ -54,11 +58,11 @@ public class Redirect extends AbstractCommand
 	@Override
 	public void execute(RuntimeConnector connector)
 	{
-		// default param is the view to go to
+		// default parameter is the view to go to
 		String target = getVariableValueAsString("default", connector);
 
-		RedirectRunResult redirect = new RedirectRunResult(target);
-		Map<String, String[]> resolved = new HashMap<String, String[]>();
+		// create map of parameters for redirect URL
+		Map<String, String> parameters = new HashMap<String, String>();
 		for (String key : this.signatureParameters.keySet())
 		{
 			if (key.equals("default"))
@@ -66,16 +70,18 @@ public class Redirect extends AbstractCommand
 				continue;
 			}
 			String value = getVariableValueAsString(key, connector);
-			logger.info("Redirect: mapping [{}] to [{}]", key, value);
+			logger.debug("Redirect: mapping [{}] to [{}]", key, value);
 
-			// FIXME: why is this a String[] ?
-			resolved.put(key, new String[] { value });
+			parameters.put(key, value);
 		}
-		redirect.setParameters(resolved);
 
-		HulaWebContext whc = (HulaWebContext)connector.getHulaContext();
-		whc.setRunResult(redirect);
+		// build run result
+		RedirectRunResult redirect = new RedirectRunResult(target);
+		redirect.setParameters(parameters);
 
+		// add to context
+		HulaWebContext hulaWebContext = (HulaWebContext) connector.getHulaContext();
+		hulaWebContext.setRunResult(redirect);
 	}
 
 	public void updateBeanShellScript(BeanShellScript script)
@@ -83,6 +89,5 @@ public class Redirect extends AbstractCommand
 		super.updateBeanShellScript(script);
 		script.add("return;");
 	}
-
 
 }

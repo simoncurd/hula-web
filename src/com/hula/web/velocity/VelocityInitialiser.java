@@ -20,21 +20,30 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.velocity.app.Velocity;
+import org.apache.velocity.runtime.directive.Directive;
 
+/**
+ * Utility class with methods for initialising Velocity
+ */
 public class VelocityInitialiser
 {
-	public static final void initialise(String applicationPath)
+	/**
+	 * Initialise Velocity
+	 * 
+	 * @param templatePath the path to templates
+	 */
+	public static final void initialise(String templatePath)
 	{
 		// Setup Velocity
-		Properties p = new Properties();
+		Properties velocityProperties = new Properties();
 
 		// create a list of custom directives we're using
-		List<Class> userDirectiveClasses = new ArrayList<Class>();
+		List<Class<? extends Directive>> userDirectiveClasses = new ArrayList<Class<? extends Directive>>();
 		userDirectiveClasses.add(Decorate.class);
 
 		// build the user directive string
 		StringBuilder userDirectiveStr = new StringBuilder();
-		for (Class clz : userDirectiveClasses)
+		for (Class<? extends Directive> clz : userDirectiveClasses)
 		{
 			if (userDirectiveStr.length() > 0)
 			{
@@ -42,19 +51,19 @@ public class VelocityInitialiser
 			}
 			userDirectiveStr.append(clz.getName());
 		}
-		
-		// wire in our custom directive
-		p.setProperty("userdirective", userDirectiveStr.toString());
-		
-		p.setProperty("velocimacro.library", "");
 
-		// tell velocity where our .vm files live
-		
-		p.setProperty("resource.loader", "relativecp");
-		p.setProperty("relativecp.resource.loader.description", "Relative CP Loader");
-		p.setProperty("relativecp.resource.loader.class", RelativeClasspathResourceLoader.class.getName());
-		p.setProperty(RelativeClasspathResourceLoader.RELATIVE_PATH, applicationPath);
-		
-		Velocity.init(p);
+		// wire in our custom directives
+		velocityProperties.setProperty("userdirective", userDirectiveStr.toString());
+
+		velocityProperties.setProperty("velocimacro.library", "");
+
+		// wire in our custom resource loader
+		velocityProperties.setProperty("resource.loader", "relativecp");
+		velocityProperties.setProperty("relativecp.resource.loader.description", "Relative CP Loader");
+		velocityProperties.setProperty("relativecp.resource.loader.class", RelativeClasspathResourceLoader.class.getName());
+		velocityProperties.setProperty(RelativeClasspathResourceLoader.RELATIVE_PATH, templatePath);
+
+		// initialise
+		Velocity.init(velocityProperties);
 	}
 }

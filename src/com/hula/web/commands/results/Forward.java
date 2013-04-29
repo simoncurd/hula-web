@@ -24,11 +24,14 @@ import com.hula.web.model.HulaWebContext;
 import com.hula.web.model.runresult.ForwardRunResult;
 
 /**
- * Forwards the request onto another action, without returning. <br/><br/>
+ * Forwards the request onto another action, without returning. <br/>
+ * <br/>
  * 
- * Example Usage: <br/><br/>
+ * Example Usage: <br/>
+ * <br/>
  * 
- * Forwards from the current Hula script to a Hula script called "login"
+ * Forwards from the current Hula script to a Hula script called "login" <br/>
+ * 
  * <pre>
  * Forward login
  * </pre>
@@ -42,7 +45,7 @@ public class Forward extends AbstractCommand
 	public void execute(RuntimeConnector connector)
 	{
 		ForwardRunResult forwardRunResult = new ForwardRunResult(getSignatureParameter("default"));
-		HulaWebContext hulaWebContext = (HulaWebContext)connector.getHulaContext();
+		HulaWebContext hulaWebContext = (HulaWebContext) connector.getHulaContext();
 		hulaWebContext.setRunResult(forwardRunResult);
 	}
 

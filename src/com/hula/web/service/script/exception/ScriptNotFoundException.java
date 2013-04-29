@@ -15,12 +15,16 @@
  */
 package com.hula.web.service.script.exception;
 
+/**
+ * Indicates a script was not found
+ */
 public class ScriptNotFoundException extends Exception
 {
 	public ScriptNotFoundException()
 	{
 		super();
 	}
+
 	public ScriptNotFoundException(Exception e)
 	{
 		super(e);

@@ -26,6 +26,33 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.directive.Parse;
 import org.apache.velocity.runtime.parser.node.Node;
 
+/**
+ * Custom Velocity directive to specify that a block of content
+ * should be decorated. <br/>
+ * <br/>
+ * 
+ * Example usage: The velocity page specifies a separate template for the layout<br/>
+ * 
+ * <pre>
+ * {@code
+ * #decorate("layout.vm")
+ *    <h1>Page Title</h1>
+ * #end
+ * }
+ * </pre>
+ * 
+ * The layout template replaces <code>$body_content</code> with the decorated content: <br/>
+ * 
+ * <pre>
+ * {@code
+ * <html>
+ *    <body>
+ *       $body_content
+ *    </body>
+ * </html>
+ * }
+ * </pre>
+ */
 public class Decorate extends Parse
 {
 

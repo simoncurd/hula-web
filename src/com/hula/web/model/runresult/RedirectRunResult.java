@@ -19,28 +19,34 @@ import java.util.Map;
 
 import com.hula.web.model.RunResult;
 
+/**
+ * RunResult indicating that a request should be redirected to an alternative
+ * script or URL. <br/>
+ * 
+ * See also {@link com.hula.web.commands.results.Redirect}
+ */
 public class RedirectRunResult implements RunResult
 {
-	private String action;
+	private String target;
 
-	private Map<String, String[]> parameters;
+	private Map<String, String> parameters;
 
-	public RedirectRunResult(String action)
+	public RedirectRunResult(String target)
 	{
-		this.action = action;
+		this.target = target;
 	}
 
-	public String getAction()
+	public String getTarget()
 	{
-		return action;
+		return target;
 	}
 
-	public Map<String, String[]> getParameters()
+	public Map<String, String> getParameters()
 	{
 		return parameters;
 	}
 
-	public void setParameters(Map<String, String[]> parameters)
+	public void setParameters(Map<String, String> parameters)
 	{
 		this.parameters = parameters;
 	}

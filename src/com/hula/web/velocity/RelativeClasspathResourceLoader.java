@@ -24,17 +24,23 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
 /**
  * A custom Velocity Resource Loader for loading templates from a path relative
- * to a classpath location. 
+ * to a classpath location. <br/>
+ * <br/>
  * 
  * This is required because the Velocity ClasspathResourceLoader
  * expects templates either in the WEB-INF/classes directory, or bundled into a
- * jar file. This allows us to serve templates from an alternative folder 
- * within the web app, by specifying a path relative to the WebappClassLoader
- * (using repository "/WEB-INF/classes").
+ * jar file. This allows us to serve templates from an alternative folder
+ * within the web app, by specifying a path relative to the WebappClassLoader.<br/>
+ * <br/>
  * 
- * Path specification needs to happen within the ResourceLoader (as opposed to 
+ * For example, specifying <code>relativecp.path=../scripts</code> means the
+ * resource loader will look in <code>WEB-INF/classes/../scripts</code>, which resolves
+ * to <code>WEB-INF/scripts</code> <br/>
+ * <br/>
+ * 
+ * Path specification needs to happen within the ResourceLoader (as opposed to
  * when calling Velocity.getTemplate(...)) to support references within a template
- * to another template. 
+ * to another template.
  */
 public class RelativeClasspathResourceLoader extends ClasspathResourceLoader
 {
@@ -45,7 +51,7 @@ public class RelativeClasspathResourceLoader extends ClasspathResourceLoader
 	public void init(ExtendedProperties configuration)
 	{
 		super.init(configuration);
-		
+
 		Object obj = Velocity.getProperty(RELATIVE_PATH);
 		if (obj != null)
 		{
@@ -56,7 +62,5 @@ public class RelativeClasspathResourceLoader extends ClasspathResourceLoader
 	public InputStream getResourceStream(String name) throws ResourceNotFoundException
 	{
 		return super.getResourceStream(relativePath + "/" + name);
-
 	}
-
 }

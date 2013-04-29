@@ -21,9 +21,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.hula.lang.factory.CommandFactory;
 import com.hula.lang.factory.CommandFactoryImpl;
 import com.hula.lang.parser.HulaExecutable;
@@ -35,32 +35,29 @@ import com.hula.web.model.Script;
 import com.hula.web.service.script.exception.ScriptNotFoundException;
 import com.hula.web.service.script.exception.ScriptParseException;
 
+/**
+ * Service for loading and parsing Hula scripts from disk
+ */
+@Singleton
 public class ScriptServiceImpl implements ScriptService
 {
-	private static Logger logger = LoggerFactory.getLogger(ScriptServiceImpl.class);
-
-	private static ScriptServiceImpl impl = null;
 	private CommandFactory commandFactory = null;
+	private Properties secureScripts = null;
 	private String scriptPath = null;
 
-	public static ScriptServiceImpl initialise(String scriptPath, String commandPath, String commandKeys)
-	{
-		if (impl == null)
-		{
-			impl = new ScriptServiceImpl(scriptPath, commandPath, commandKeys);
-		}
-		return impl;
-	}
-
-	public static ScriptServiceImpl getInstance()
-	{
-		return impl;
-	}
-
-	private ScriptServiceImpl(String scriptPath, String commandPath, String commandKeys)
+	/**
+	 * Construct the ScriptService.
+	 * 
+	 * @param scriptPath The path to the scripts
+	 * @param commandPath The path to the commands
+	 * @param commandKeys A comma-separated list of filename prefixes for command files (*.commands.properties)
+	 */
+	@Inject
+	public ScriptServiceImpl(@Named("script.path") String scriptPath, @Named("command.path") String commandPath, @Named("command.keys") String commandKeys)
 	{
 		this.scriptPath = scriptPath;
 
+		// setup the command factory
 		this.commandFactory = new CommandFactoryImpl();
 		try
 		{
@@ -75,13 +72,36 @@ public class ScriptServiceImpl implements ScriptService
 			throw new RuntimeException("error loading hula commands", e);
 		}
 
+		// setup the properties file for secure scripts
+		this.secureScripts = new Properties();
+		InputStream in = FileUtil.getFileInputStream(scriptPath + "/secure.properties");
+		try
+		{
+			secureScripts.load(in);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException("error loading secure properties", e);
+		}
+		finally
+		{
+			try
+			{
+				in.close();
+			}
+			catch (IOException e)
+			{
+				// swallow - nothing we can do about this
+			}
+		}
+
 	}
 
 	@Override
 	public boolean hasScript(String name)
 	{
 		InputStream inputStream = FileUtil.getFileInputStream(getScriptPath(name));
-		
+
 		boolean result = (inputStream != null) ? true : false;
 		try
 		{
@@ -98,24 +118,28 @@ public class ScriptServiceImpl implements ScriptService
 	public HulaExecutable read(String name) throws IOException, HulaParserException
 	{
 		InputStream inputStream = FileUtil.getFileInputStream(getScriptPath(name));
+		StringBuilder scriptContainer = new StringBuilder();
 
-		// load the file
-		BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-		String line = null;
-		StringBuilder sb = new StringBuilder();
-		while ((line = in.readLine()) != null)
+		try
 		{
-			sb.append(line);
-			sb.append("\n");
+			// load the file
+			BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+			String line = null;
+			while ((line = in.readLine()) != null)
+			{
+				scriptContainer.append(line);
+				scriptContainer.append("\n");
+			}
+			in.close();
 		}
-		in.close();
-
-		// FIXME: do we need this?
-		inputStream.close();
+		finally
+		{
+			inputStream.close();
+		}
 
 		// parse script
 		HulaParser parser = new HulaParserImpl(commandFactory);
-		HulaExecutable exec = parser.parse(sb.toString());
+		HulaExecutable exec = parser.parse(scriptContainer.toString());
 		return exec;
 	}
 
@@ -145,20 +169,24 @@ public class ScriptServiceImpl implements ScriptService
 		}
 	}
 
+	/**
+	 * Checks if the named script is secure
+	 * 
+	 * @param name The script to check
+	 * @return flag indicating if the script is secure
+	 * @throws IOException
+	 */
 	private boolean isSecure(String name) throws IOException
 	{
-		// FIXME: loads secure.properties every time
-		Properties secureProperties = new Properties();
-
-		String path = scriptPath + "/secure.properties";
-		
-		InputStream in = FileUtil.getFileInputStream(path);
-		secureProperties.load(in);
-		in.close();
-		
-		return secureProperties.containsKey(name + ".txt");
+		return this.secureScripts.containsKey(name + ".txt");
 	}
 
+	/**
+	 * Get the relative path to the script
+	 * 
+	 * @param name The name of the script
+	 * @return The relative path to the script
+	 */
 	private String getScriptPath(String name)
 	{
 		return scriptPath + "/" + name + ".txt";

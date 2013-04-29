@@ -20,9 +20,26 @@ import com.hula.web.model.Script;
 import com.hula.web.service.script.exception.ScriptNotFoundException;
 import com.hula.web.service.script.exception.ScriptParseException;
 
+/**
+ * Service for resolving Hula scripts
+ */
 public interface ScriptService extends ScriptReader
 {
+	/**
+	 * Check if a Hula script exists for the given name
+	 * 
+	 * @param name The name of the script to find
+	 * @return flag to indicate if the script exists
+	 */
 	boolean hasScript(String name);
-	
+
+	/**
+	 * Get a Hula script
+	 * 
+	 * @param name The name of the script to find
+	 * @return The Hula script
+	 * @throws ScriptNotFoundException
+	 * @throws ScriptParseException
+	 */
 	Script getScript(String name) throws ScriptNotFoundException, ScriptParseException;
 }

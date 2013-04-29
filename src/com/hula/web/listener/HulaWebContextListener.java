@@ -24,8 +24,10 @@ import javax.servlet.ServletContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.hula.web.WebConstants;
-import com.hula.web.service.script.ScriptServiceImpl;
+import com.hula.web.service.ServiceModule;
 import com.hula.web.velocity.VelocityInitialiser;
 
 /**
@@ -55,8 +57,8 @@ public class HulaWebContextListener implements ServletContextListener
 			sctx.setAttribute(WebConstants.httpPort, httpPort);
 			sctx.setAttribute(WebConstants.httpsPort, httpsPort);
 
-			// initialise the script service
-			ScriptServiceImpl.initialise(scriptPath, commandPath, commandKeys);
+			Injector injector = Guice.createInjector(new ServiceModule(scriptPath, commandPath, commandKeys));
+			sctx.setAttribute(WebConstants.Injector, injector);
 
 			// initialise velocity
 			VelocityInitialiser.initialise(pagePath);

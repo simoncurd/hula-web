@@ -17,6 +17,11 @@ package com.hula.web.model.runresult;
 
 import com.hula.web.model.RunResult;
 
+/**
+ * RunResult indicating that a page-based response should be rendered. <br/>
+ * 
+ * See also {@link com.hula.web.commands.results.SetView}
+ */
 public class ShowPageRunResult implements RunResult
 {
 	private String pageName;

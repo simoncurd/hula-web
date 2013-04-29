@@ -24,11 +24,14 @@ import com.hula.web.model.HulaWebContext;
 import com.hula.web.model.runresult.ShowPageRunResult;
 
 /**
- * Set the page to be rendered. <br/><br/>
+ * Set the page to be rendered. <br/>
+ * <br/>
  * 
- * Example Usage: <br/><br/>
+ * Example Usage: <br/>
+ * <br/>
  * 
- * Show the welcome page.
+ * Show the welcome page.<br/>
+ * 
  * <pre>
  * SetView welcome
  * </pre>
@@ -43,7 +46,7 @@ public class SetView extends AbstractCommand
 	public void execute(RuntimeConnector connector)
 	{
 		String view = this.getSignatureParameter("default");
-		HulaWebContext hulaWebContext = (HulaWebContext)connector.getHulaContext();
+		HulaWebContext hulaWebContext = (HulaWebContext) connector.getHulaContext();
 		hulaWebContext.setRunResult(new ShowPageRunResult(view));
 	}
 

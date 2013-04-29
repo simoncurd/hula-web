@@ -17,6 +17,12 @@ package com.hula.web.model.runresult;
 
 import com.hula.web.model.RunResult;
 
+/**
+ * RunResult indicating that the request should be forwarded to another
+ * Hula script. <br/>
+ * 
+ * See also {@link com.hula.web.commands.results.Forward}
+ */
 public class ForwardRunResult implements RunResult
 {
 	private String scriptName;
@@ -35,6 +41,5 @@ public class ForwardRunResult implements RunResult
 	{
 		this.scriptName = scriptName;
 	}
-
 
 }

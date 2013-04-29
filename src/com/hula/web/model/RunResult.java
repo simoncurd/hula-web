@@ -17,7 +17,7 @@ package com.hula.web.model;
 
 /**
  * An object returned from a Hula script to describe the result of the
- * script. 
+ * script.
  */
 public interface RunResult
 {
