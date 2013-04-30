@@ -1,0 +1,10 @@
+
+GetSession as session
+
+Echo "the name is $name"
+
+Set $session.name=$name
+
+SaveSession
+
+Redirect getname

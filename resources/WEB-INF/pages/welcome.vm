@@ -1,8 +1,19 @@
 
 #decorate("layout.vm")
 
-	<h1>Welcome from Hula to you, $name</h1>
+
+      <div class="hero-unit">
+        <h1>Hula Web</h1>
+        <p>
+        	Hula-web is a web application framework for Java based on the 
+			<a href="https://github.com/simoncurd/hula-lang" target="_blank">Hula Scripting Language</a>. 
+			It was designed to simplify and accelerate  development of web applications.	
+       	</p>
+      </div>
+      
+	<a href="getname">Session Example</a>
 	
-	<a href="login">Login Here</a>
+	
+	
 
 #end

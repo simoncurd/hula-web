@@ -29,8 +29,11 @@
 			<lib file="${build.dir}/hula-web.jar" />
 			<lib dir="${hula.lang.path}/lib" includes="*.jar" />
 			<lib dir="${hula.lang.path}/lib/dependencies" />
+			<!--
 			<webinf dir="resources/WEB-INF" includes="pages/*"/>
 			<webinf dir="resources/WEB-INF" includes="scripts/*"/>
+			-->
+			<fileset dir="resources"/>
 		</war>
 		
 	</target>

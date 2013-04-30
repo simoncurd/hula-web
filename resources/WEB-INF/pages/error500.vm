@@ -1,5 +1,0 @@
-User defined 500 error <br/>
-
-Message was: ${exception.message}<br/>
-
-That's it

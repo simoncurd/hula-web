@@ -1,0 +1,20 @@
+#decorate("layout.vm")
+
+
+	<div class="row">
+			<h1>Channel-switching example</h1>
+			<p>
+				Hula Web will automatically switch between http/https channels. Scripts requiring a
+				secure channel are configured in the <code>scripts/secure.properties</code> file
+			</p>		
+			<p>
+				<a href="/hula/secure">Switch to Secure Channel</a>
+			</p>
+			<p>
+				<a href="/hula/nonsecure">Switch to Non-secure Channel</a>
+			</p>
+	</div>
+
+
+
+#end

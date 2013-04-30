@@ -1,6 +1,0 @@
-
-GetSession create=false as session
-
-Set $session.user=$username
-
-SaveSession
