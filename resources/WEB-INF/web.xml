@@ -6,73 +6,18 @@
   version="3.0"
   metadata-complete="true">  
   
-  
-    <env-entry>
-      <env-entry-name>httpPort</env-entry-name>
-      <env-entry-type>java.lang.String</env-entry-type>
-      <env-entry-value>8080</env-entry-value>
-    </env-entry>    
-
-    <env-entry>
-      <env-entry-name>httpsPort</env-entry-name>
-      <env-entry-type>java.lang.String</env-entry-type>
-      <env-entry-value>8443</env-entry-value>
-    </env-entry>    
-
-    <env-entry>
-      <env-entry-name>generic404</env-entry-name>
-      <env-entry-type>java.lang.String</env-entry-type>
-      <env-entry-value>platform404.vm</env-entry-value>
-    </env-entry>        
-    
-    <env-entry>
-      <env-entry-name>commandPath</env-entry-name>
-      <env-entry-type>java.lang.String</env-entry-type>
-      <env-entry-value></env-entry-value>
-    </env-entry>   	    
- 	
-    <env-entry>
-      <env-entry-name>commandKeys</env-entry-name>
-      <env-entry-type>java.lang.String</env-entry-type>
-      <env-entry-value>lang,web</env-entry-value>
-    </env-entry>   	    
- 	
-    <env-entry>
-      <env-entry-name>scriptPath</env-entry-name>
-      <env-entry-type>java.lang.String</env-entry-type>
-      <env-entry-value>../scripts</env-entry-value>
-    </env-entry>   	
- 	
-    <env-entry>
-      <env-entry-name>pagePath</env-entry-name>
-      <env-entry-type>java.lang.String</env-entry-type>
-      <env-entry-value>../pages</env-entry-value>
-    </env-entry>   	 
-    
 	<filter>
-	   <filter-name>HulaWebFilter</filter-name>
-	   <filter-class>com.hula.web.filter.HulaWebFilter</filter-class>
+		<filter-name>guiceFilter</filter-name>
+		<filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
 	</filter>
 
-
 	<filter-mapping>
-        <filter-name>HulaWebFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-
-    <listener>
-        <listener-class>com.hula.web.listener.HulaWebContextListener</listener-class>
-    </listener>
-
-    <servlet>
-        <servlet-name>HulaWebServlet</servlet-name>
-        <servlet-class>com.hula.web.servlet.HulaWebServlet</servlet-class>
-    </servlet>
- 
-    <servlet-mapping>
-        <servlet-name>HulaWebServlet</servlet-name>
-        <url-pattern>/exec</url-pattern>
-    </servlet-mapping>
+		<filter-name>guiceFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
     
+	<listener>
+		<listener-class>com.hula.web.listener.HulaWebContextListener</listener-class>
+	</listener>    
 
 </web-app>

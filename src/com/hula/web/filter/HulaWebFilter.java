@@ -23,7 +23,6 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -33,7 +32,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Injector;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.hula.web.WebConstants;
 import com.hula.web.model.Script;
 import com.hula.web.service.script.ScriptService;
@@ -45,14 +46,22 @@ import com.hula.web.util.URLUtils;
  * Filter responsible for recognising Hula requests, as well as channel switching
  * between secure/non-secure URLs
  */
+@Singleton
 public class HulaWebFilter implements Filter
 {
 	private static Logger logger = LoggerFactory.getLogger(HulaWebFilter.class);
 
 	private String httpPort = null;
 	private String httpsPort = null;
-	
 	private ScriptService scriptService = null;
+
+	@Inject
+	public HulaWebFilter(ScriptService scriptService, @Named("http.port") String httpPort, @Named("https.port") String httpsPort)
+	{
+		this.scriptService = scriptService;
+		this.httpPort = httpPort;
+		this.httpsPort = httpsPort;
+	}
 
 	@Override
 	public void doFilter(ServletRequest baseRequest, ServletResponse baseResponse, FilterChain fc) throws IOException, ServletException
@@ -68,7 +77,6 @@ public class HulaWebFilter implements Filter
 		logger.info("script [{}]", scriptName);
 
 		// load the script
-		//ScriptService scriptService = ScriptServiceImpl.getInstance();
 		Script script = null;
 		try
 		{
@@ -96,7 +104,8 @@ public class HulaWebFilter implements Filter
 		}
 
 		// forward to the servlet
-		RequestDispatcher rd = request.getRequestDispatcher("/exec?script=" + scriptName);
+		request.setAttribute(WebConstants.ScriptName, scriptName);
+		RequestDispatcher rd = request.getRequestDispatcher("/exec");
 		rd.forward(baseRequest, baseResponse);
 	}
 
@@ -140,12 +149,6 @@ public class HulaWebFilter implements Filter
 	@Override
 	public void init(FilterConfig fc) throws ServletException
 	{
-		ServletContext sctx = fc.getServletContext();
-		this.httpPort = (String) sctx.getAttribute(WebConstants.httpPort);
-		this.httpsPort = (String) sctx.getAttribute(WebConstants.httpsPort);
-		
-		Injector injector = (Injector)sctx.getAttribute(WebConstants.Injector);
-		scriptService = injector.getInstance(ScriptService.class);
 	}
 
 	@Override

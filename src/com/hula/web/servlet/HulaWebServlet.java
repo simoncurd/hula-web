@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +28,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.hula.lang.runtime.HulaPlayer;
 import com.hula.lang.runtime.HulaPlayerImpl;
 import com.hula.lang.runtime.ServiceProxy;
@@ -40,7 +40,6 @@ import com.hula.web.model.RunResult;
 import com.hula.web.model.runresult.ForwardRunResult;
 import com.hula.web.response.ResponseProcessor;
 import com.hula.web.runtime.GuiceServiceProxy;
-import com.hula.web.runtime.ResponseProcessorMapping;
 import com.hula.web.service.script.ScriptService;
 import com.hula.web.util.ParameterUtils;
 
@@ -48,6 +47,7 @@ import com.hula.web.util.ParameterUtils;
  * Servlet responsible for executing Hula scripts and processing the
  * response.
  */
+@Singleton
 public class HulaWebServlet extends HttpServlet
 {
 	private static Logger logger = LoggerFactory.getLogger(HulaWebServlet.class);
@@ -55,7 +55,15 @@ public class HulaWebServlet extends HttpServlet
 	private ServiceProxy serviceProxy = null;
 
 	// alternative strategies for processing responses
-	private ResponseProcessorMapping responseProcessors;
+	private Map<String,ResponseProcessor> responseProcessors;
+
+	@Inject
+	public HulaWebServlet(ScriptService scriptService, Map<String,ResponseProcessor> responseProcessors, Injector injector)
+	{
+		this.scriptService = scriptService;
+		this.responseProcessors = responseProcessors;
+		this.serviceProxy = new GuiceServiceProxy(injector);
+	}
 
 	/**
 	 * Handle the incoming request
@@ -68,7 +76,7 @@ public class HulaWebServlet extends HttpServlet
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
 		// lookup the script to run
-		String scriptName = request.getParameter("script");
+		String scriptName = (String) request.getAttribute(WebConstants.ScriptName);
 
 		if (scriptName == null || scriptName.trim().equals(""))
 		{
@@ -110,7 +118,7 @@ public class HulaWebServlet extends HttpServlet
 				}
 				else
 				{
-					ResponseProcessor processor = responseProcessors.getResponseProcessor(runResult);
+					ResponseProcessor processor = responseProcessors.get(runResult.getClass().getSimpleName());
 					processor.process(hctx, request, response);
 					return;
 				}
@@ -155,21 +163,5 @@ public class HulaWebServlet extends HttpServlet
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
 		handleRequest(request, response);
-	}
-
-	/**
-	 * Initialise the servlet to execute Hula scripts
-	 */
-	public void init(ServletConfig config) throws ServletException
-	{
-		ServletContext sctx = config.getServletContext();
-		Injector injector = (Injector) sctx.getAttribute(WebConstants.Injector);
-		scriptService = injector.getInstance(ScriptService.class);
-
-		this.serviceProxy = new GuiceServiceProxy(injector);
-
-		this.responseProcessors = injector.getInstance(ResponseProcessorMapping.class);
-
-		super.init(config);
 	}
 }

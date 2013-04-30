@@ -15,66 +15,22 @@
  */
 package com.hula.web.listener;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.hula.web.WebConstants;
-import com.hula.web.service.ServiceModule;
-import com.hula.web.velocity.VelocityInitialiser;
+import com.google.inject.servlet.GuiceServletContextListener;
 
 /**
- * Responsible for initialising the HulaWeb application.
+ * Responsible for creating the Guice injector as part of the deployment
+ * of the Hula Web application
  */
-public class HulaWebContextListener implements ServletContextListener
+public class HulaWebContextListener extends GuiceServletContextListener
 {
-	private static Logger logger = LoggerFactory.getLogger(HulaWebContextListener.class);
 
 	@Override
-	public void contextInitialized(ServletContextEvent e)
+	protected Injector getInjector()
 	{
-		try
-		{
-			Context ctx = new InitialContext();
-
-			// read properties from web.xml
-			String httpPort = (String) ctx.lookup("java:comp/env/httpPort");
-			String httpsPort = (String) ctx.lookup("java:comp/env/httpsPort");
-			String scriptPath = (String) ctx.lookup("java:comp/env/scriptPath");
-			String commandPath = (String) ctx.lookup("java:comp/env/commandPath");
-			String commandKeys = (String) ctx.lookup("java:comp/env/commandKeys");
-			String pagePath = (String) ctx.lookup("java:comp/env/pagePath");
-			
-			// store on servlet context
-			ServletContext sctx = e.getServletContext();
-			sctx.setAttribute(WebConstants.httpPort, httpPort);
-			sctx.setAttribute(WebConstants.httpsPort, httpsPort);
-
-			Injector injector = Guice.createInjector(new ServiceModule(scriptPath, commandPath, commandKeys));
-			sctx.setAttribute(WebConstants.Injector, injector);
-
-			// initialise velocity
-			VelocityInitialiser.initialise(pagePath);
-		}
-		catch (Throwable t)
-		{
-			logger.error("error initialising HulaWeb", t);
-			throw new RuntimeException(t);
-		}
-
-		logger.info("HulaWeb started");
-	}
-
-	@Override
-	public void contextDestroyed(ServletContextEvent e)
-	{
+		// configure Guice with Hula Web servlet module
+		return Guice.createInjector(new HulaWebServletModule());
 	}
 
 }

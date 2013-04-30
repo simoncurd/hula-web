@@ -26,7 +26,7 @@ public class GuiceServiceProxy implements ServiceProxy
 {
 	// injector for getting guice-controlled services
 	private Injector injector;
-	
+
 	public GuiceServiceProxy(Injector injector)
 	{
 		this.injector = injector;
@@ -37,6 +37,5 @@ public class GuiceServiceProxy implements ServiceProxy
 	{
 		return injector.getInstance(type);
 	}
-
 
 }

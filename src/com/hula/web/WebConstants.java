@@ -21,9 +21,4 @@ package com.hula.web;
 public class WebConstants
 {
 	public static final String ScriptName = "h_ScriptName";
-
-	public static final String httpPort = "httpPort";
-	public static final String httpsPort = "httpsPort";
-	
-	public static final String Injector = "Injector";
 }

@@ -1,7 +1,7 @@
 
 Echo "Welcome"
 
-#Set name="Jeff"
+Set name="Jeff"
 
 Call test
 
