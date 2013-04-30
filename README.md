@@ -1,6 +1,6 @@
 # Hula-web
 
-Hula-web is a web application framework for Java based on the [Hula Scripting Language]{https://github.com/simoncurd/hula-lang}. It was designed to simplify and accelerate  development of web applications.
+Hula-web is a web application framework for Java based on the [Hula Scripting Language](https://github.com/simoncurd/hula-lang). It was designed to simplify and accelerate  development of web applications.
 
 Benefits:
 
@@ -13,7 +13,7 @@ Benefits:
 Hula-web applications are composed of Scripts & Pages.
 
 * Scripts - controls the request, reading request parameters, calling services, handling the session and specifying page flow.
-* Pages - a template which is used to render the view.
+* Pages - Velocity templates which are used to render the view.
 
 The Hula Web framework relates well to the Model-View-Controller (MVC) paradigm, in that Scripts behave as the Controller, Pages provide the Views and the object graphs of incoming requests and service interactions are the Model.
 
