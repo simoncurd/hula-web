@@ -67,42 +67,13 @@ SetView showname</pre>
 		
 	</div>
 
-	<div class="row">
-		<h2>Request with parameters</h2>
-		<p>
-			For request  <code>/shownames</code> ...
-		<p>
-		<div class="span6">
-			<h4>scripts/shownames.txt</h4>			
-			<pre class="prettyprint lang-sql">
-NewList as names
-AddToList $names, value="Jeff"
-AddToList $names, value="John"
-AddToList $names, value="Jim"
-SetView shownames</pre>
-		</div>
-	
-		<div class="span6">
-
-			<h4>pages/showname.vm</h4>
-			<pre class="prettyprint">
-&lt;html&gt;
-   &lt;body&gt;
-      &lt;ul&gt;
-         &#35;foreach ($name in $names)
-            &lt;li&gt;$name&lt;/li&gt;
-         &#35;end
-      &lt;/ul&gt;
-   &lt;/body&gt;
-&lt;/html&gt;</pre>
-		</div>	
-		
-	</div>
-	
+	<hr/>
 	<div class="row">
 		<h2>Calling other scripts</h2>
 		<p>
-			For request  <code>/shownames</code> ...
+			For request  <code>/shownames</code>, the <code>shownames.txt</code> script calls the <code>namelist.txt</code>
+			script to build the list, then specifies the view for Velocity to render. Velocity iterates over the list
+			items. 
 		<p>
 		<div class="span6">
 		

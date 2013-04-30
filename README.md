@@ -12,10 +12,10 @@ Benefits:
 
 Hula-web applications are composed of Scripts & Pages.
 
-* Scripts - contain application logic, such as page flow and form processing.  
-* Pages - contain templates for rendering views.
+* Scripts - controls the request, reading request parameters, calling services, handling the session and specifying page flow.
+* Pages - a template which is used to render the view.
 
-The Hula-web framework is analogous to MVC frameworks in that Scripts represent Controllers, Pages represent Views and Models are provided by incoming requests and underlying services. 
+The Hula Web framework relates well to the Model-View-Controller (MVC) paradigm, in that Scripts behave as the Controller, Pages provide the Views and the object graphs of incoming requests and service interactions are the Model.
 
 # Getting Started
 
@@ -23,24 +23,20 @@ A war file is provided in the /release folder which can be dropped straight into
 
 Once deployed:
 * The homepage for hula can be reached at [http://localhost:8080/hula/welcome] (Assuming out-the-box Tomcat configuration).
-* Hula scripts live in WEB-INF/scripts.
-* Velocity templates live in WEB-INF/pages.
-* Assets are located directly in the /hula folder.
-
-
 
 # Latest Version
 
 * This is a very early release and is not considered production-ready.
-* The current release is version 0.1 alpha 1. 
+* The current release is version 0.1.1
 
 # Roadmap
 
 Key Features for future versions:
 
-* Session support
-* Validation framework
 * HttpUnit-based tests
+* Validation framework
+* Improved web-service support
+* SEO URL support
 
 # Contributing
 

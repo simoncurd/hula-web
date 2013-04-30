@@ -100,18 +100,23 @@ public class ScriptServiceImpl implements ScriptService
 	@Override
 	public boolean hasScript(String name)
 	{
-		InputStream inputStream = FileUtil.getFileInputStream(getScriptPath(name));
-
-		boolean result = (inputStream != null) ? true : false;
 		try
 		{
-			inputStream.close();
+			InputStream inputStream = FileUtil.getFileInputStream(getScriptPath(name));
+			try
+			{
+				inputStream.close();
+			}
+			catch (IOException e)
+			{
+				// swallow - nothing we can do about this
+			}
+			return true;
 		}
-		catch (IOException e)
+		catch (RuntimeException e)
 		{
-			// swallow - nothing we can do about this
+			return false;
 		}
-		return result;
 	}
 
 	@Override

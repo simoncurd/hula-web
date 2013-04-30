@@ -70,10 +70,16 @@ public class HulaWebFilter implements Filter
 		HttpServletResponse response = (HttpServletResponse) baseResponse;
 
 		String requestURL = request.getRequestURL().toString();
-		logger.info("request [{}]", requestURL);
-
+		
 		String contextPath = request.getContextPath();
 		String scriptName = URLUtils.getScriptName(requestURL, contextPath);
+
+		// this filters out requests for non-hula resources
+		if (!scriptService.hasScript(scriptName))
+		{
+			return;
+		}
+		logger.info("request [{}]", requestURL);
 		logger.info("script [{}]", scriptName);
 
 		// load the script
