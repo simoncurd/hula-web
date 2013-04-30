@@ -55,10 +55,10 @@ public class HulaWebServlet extends HttpServlet
 	private ServiceProxy serviceProxy = null;
 
 	// alternative strategies for processing responses
-	private Map<String,ResponseProcessor> responseProcessors;
+	private Map<String, ResponseProcessor> responseProcessors;
 
 	@Inject
-	public HulaWebServlet(ScriptService scriptService, Map<String,ResponseProcessor> responseProcessors, Injector injector)
+	public HulaWebServlet(ScriptService scriptService, Map<String, ResponseProcessor> responseProcessors, Injector injector)
 	{
 		this.scriptService = scriptService;
 		this.responseProcessors = responseProcessors;
@@ -102,29 +102,35 @@ public class HulaWebServlet extends HttpServlet
 		}
 		scripts.add(scriptName);
 
+		runScripts(scripts, hctx, request, response);
+	}
+
+	protected void runScripts(List<String> scripts, HulaWebContext hulaWebContext, HttpServletRequest request, HttpServletResponse response) throws IOException
+	{
 		// execute scripts
 		for (String scriptItem : scripts)
 		{
-			RunResult runResult = runScript(scriptItem, hctx, request, response);
+			RunResult runResult = runScript(scriptItem, hulaWebContext, request, response);
 			logger.info("script [" + scriptItem + "] finished");
 
 			if (runResult != null)
 			{
 				if (runResult instanceof ForwardRunResult)
 				{
-					ForwardRunResult fwd = (ForwardRunResult) hctx.getRunResult();
-					this.runScript(fwd.getScriptName(), hctx, request, response);
+					ForwardRunResult fwd = (ForwardRunResult) hulaWebContext.getRunResult();
+					List<String> forwardList = new ArrayList<String>(1);
+					forwardList.add(fwd.getScriptName());
+					this.runScripts(forwardList, hulaWebContext, request, response);
 					return;
 				}
 				else
 				{
 					ResponseProcessor processor = responseProcessors.get(runResult.getClass().getSimpleName());
-					processor.process(hctx, request, response);
+					processor.process(hulaWebContext, request, response);
 					return;
 				}
 			}
 		}
-
 	}
 
 	/**
