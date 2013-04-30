@@ -22,7 +22,7 @@ The Hula Web framework relates well to the Model-View-Controller (MVC) paradigm,
 A war file is provided in the /release folder which can be dropped straight into Tomcat. This deploys to the /hula context.
 
 Once deployed:
-* The homepage for hula can be reached at [http://localhost:8080/hula/welcome] (Assuming out-the-box Tomcat configuration).
+* The homepage for hula can be reached at [http://localhost:8080/hula/welcome](http://localhost:8080/hula/welcome) (Assuming out-the-box Tomcat configuration).
 
 # Latest Version
 
