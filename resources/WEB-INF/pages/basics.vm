@@ -1,7 +1,7 @@
 #decorate("layout.vm")
 
 	<div class="row">
-		<h1>Basics</h1>
+		<h1>The Basics</h1>
 		<p>
 			Hula Web combines the <a href="https://github.com/simoncurd/hula-lang" target="_blank">Hula Scripting Language</a> 
 			with the <a href="http://velocity.apache.org/" target="_blank">Velocity template engine</a>.

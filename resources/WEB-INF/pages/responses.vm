@@ -1,0 +1,186 @@
+#decorate("layout.vm")
+
+
+	<div class="row">
+		<h1>Responses</h1>
+		<p>
+			Hula provides several commands for responding to requests.
+			<ul>
+				<li>SetView - a view should be rendered</li>
+				<li>ReturnContent - content from a variable should be returned</li>
+				<li>Forward - forward the request to another Hula script</li>
+				<li>Redirect - redirect the request to another Hula script or URL</li>
+			</ul>
+		</p>
+	</div>
+
+	<hr/>
+	<div class="row">
+		<h2>Rendering a page</h2>
+		<p>
+			For request  <code>/freebeer?age=20</code>, the script decides which page to render depending on the age parameter.
+		<p>
+		<div class="span6">
+			<h4>scripts/freebeer.txt</h4>			
+			<pre class="prettyprint lang-sql">
+If $age < $legallimit
+   SetView tooyoung
+Else
+   SetView whynot
+End</pre>
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/tooyoung.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      Free Beer? Sorry, I'm afraid you're too young.
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+
+		
+			<h4>pages/whynot.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      Free Beer? Why not!
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+		</div>	
+				
+	</div>
+
+	<hr/>
+	<div class="row">
+		<h2>Returning content</h2>
+		<p>
+			For request <code>/freebeer?age=32</code>, the script decides which message
+			is appropriate, adds this to a map, converts this to a Json string 
+			and returns this to the user. The response
+			is <code>{"message":"why not"}</code> 
+		<p>
+		<div class="span6">
+			<h4>scripts/freebeer.txt</h4>			
+			<pre class="prettyprint lang-sql">
+NewMap as result
+If $age < $legallimit
+   Set $result.message="sorry, too young"
+Else
+   Set $result.message="why not"
+End
+MapToJson $result as resultJson
+ReturnContent $resultJson
+</pre>
+	
+		</div>	
+				
+	</div>
+
+
+
+	<hr/>
+	<div class="row">
+		<h2>Forwarding the request</h2>
+		<p>
+			For request  <code>/freebeer?age=20</code>, the script forwards the request
+			to either <code>scripts/tooyoung.txt</code> or <code>scripts/whynot.txt</code>,
+			depending on the age provided. Both scripts set an appropriate message and
+			render the same view. The view displays the message provided.
+		<p>
+		<div class="span6">
+			<h4>scripts/freebeer.txt</h4>			
+			<pre class="prettyprint lang-sql">
+If $age < $legallimit
+   Forward tooyoung
+Else
+   Forward whynot
+End</pre>
+
+			<h4>scripts/tooyoung.txt</h4>			
+			<pre class="prettyprint lang-sql">
+Set message="sorry, too young"
+SetView beermessage</pre>
+
+			<h4>scripts/whynot.txt</h4>			
+			<pre class="prettyprint lang-sql">
+Set message="hey, why not?"
+SetView beermessage</pre>
+
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/beermessage.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      Free Beer? $message
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+
+		
+		</div>	
+				
+	</div>
+
+	<hr/>
+	<div class="row">
+		<h2>Sending a redirect</h2>
+		<p>
+			An alternative to forwarding, this example shows how a request for
+			 <code>/freebeer?age=20</code> is redirected 
+			to either <code>scripts/tooyoung.txt</code> or <code>scripts/whynot.txt</code>,
+			depending on the age provided. Both scripts set an appropriate message and
+			render the same view. The view displays the message provided.
+			<br/>
+			The primary difference between Redirect and Forward is:
+			<ul>
+				<li>Forward is handled internally, so the URL
+					doesn't change.</li>
+				<li>Redirect sends a response to the users browser
+					redirecting them to an alternative URL, which is shown in the address bar.</li>
+			</ul>
+			
+		<p>
+		<div class="span6">
+			<h4>scripts/freebeer.txt</h4>			
+			<pre class="prettyprint lang-sql">
+If $age < $legallimit
+   Redirect tooyoung
+Else
+   Redirect whynot
+End</pre>
+
+			<h4>scripts/tooyoung.txt</h4>			
+			<pre class="prettyprint lang-sql">
+Set message="sorry, too young"
+SetView beermessage</pre>
+
+			<h4>scripts/whynot.txt</h4>			
+			<pre class="prettyprint lang-sql">
+Set message="hey, why not?"
+SetView beermessage</pre>
+
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/beermessage.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      Free Beer? $message
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+
+		
+		</div>	
+				
+	</div>
+
+
+
+
+#end

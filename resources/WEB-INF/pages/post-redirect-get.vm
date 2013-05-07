@@ -1,51 +1,3 @@
-#decorate("layout.vm")
-
-
-	<div class="row">
-		<h1>Page Flow</h1>
-		<p>
-			
-		</p>
-	</div>
-
-	<hr/>
-	<div class="row">
-		<h2>Choosing alternative pages</h2>
-		<p>
-			For request  <code>/freebeer?age=17</code>, the script decides which page to render depending on the age parameter.
-		<p>
-		<div class="span6">
-			<h4>scripts/freebeer.txt</h4>			
-			<pre class="prettyprint lang-sql">
-If $age < 18
-   SetView tooyoung
-Else
-   SetView whynot
-End</pre>
-		</div>
-	
-		<div class="span6">
-
-			<h4>pages/tooyoung.vm</h4>
-			<pre class="prettyprint">
-&lt;html&gt;
-   &lt;body&gt;
-      Free Beer? Sorry, I'm afraid you're too young.
-   &lt;/body&gt;
-&lt;/html&gt;</pre>
-
-		
-			<h4>pages/whynot.vm</h4>
-			<pre class="prettyprint">
-&lt;html&gt;
-   &lt;body&gt;
-      Free Beer? Why not!
-   &lt;/body&gt;
-&lt;/html&gt;</pre>
-		</div>	
-				
-	</div>
-	<hr/>
 	<div class="row">
 		<h2>Handling Redirects</h2>
 		<p>
@@ -92,5 +44,3 @@ Set a new name in the session:
 		</div>	
 				
 	</div>
-
-#end

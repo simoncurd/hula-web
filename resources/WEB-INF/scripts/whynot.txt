@@ -1,0 +1,3 @@
+Set message="Hells yeah"
+
+SetView freebeer

@@ -1,5 +1,6 @@
 Echo "this is common file"
 
-If $h_ScriptName = "alt"
-	Forward alt2
+If $h_ScriptName = "freebeer"
+	Set message="YAY!!!"
+	SetView freebeer
 End
