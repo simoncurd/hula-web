@@ -1,0 +1,75 @@
+#decorate("layout.vm")
+
+	<div class="row">
+		<h1>Routing</h1>
+		<p>
+			Routing is the mechanism which determines which script is run, based 
+			on the URL requested. Hula Web uses two mechanisms for routing requests, 
+			applied in the following order:
+			<ul>
+				<li>By script name - the URL requested matches the name of a script</li>
+				<li>By mapping rule - a set of rules which map URLs to scripts </li> 
+			</ul>
+		</p>
+	</div>
+	<hr/>
+	<div class="row">
+		<h2>Script name routing</h2>
+		<p>
+			At the most basic level, to service a request to <code>/helloworld</code>, 
+			Hula Web checks the <code>/scripts</code> folder
+			for <code>helloworld.txt</code>, finds a match, and executes the script
+		<p>
+		<div class="span6">
+			<h4>scripts/helloworld.txt</h4>			
+			<pre class="prettyprint lang-sql">
+SetView welcome</pre>
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/helloworld.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      Hello, World!
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+		</div>	
+		
+	</div>
+	<hr/>
+
+	<div class="row">
+		<h2>Scripts in folders</h2>
+		<p>
+			Scripts stored in folders can be called by including the
+			folder name in the URL. In this example, requests to <code>/greeting/helloworld</code> 
+			will be serviced by a script in <code>/scripts/greeting/helloworld.txt</code>.
+		<p>
+		<p>
+			This may be used to achieve a specific URL structure, or simply to 
+			group scripts.
+		</p>
+		<div class="span6">
+			<h4>scripts/greeting/helloworld.txt</h4>			
+			<pre class="prettyprint lang-sql">
+SetView welcome</pre>
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/helloworld.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      Hello, World!
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+		</div>	
+		
+	</div>
+	<hr/>
+
+
+#end

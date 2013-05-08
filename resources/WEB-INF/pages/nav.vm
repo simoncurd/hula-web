@@ -1,8 +1,9 @@
 
 
     <ul class="nav">
-      <li><a href="/hula/basics">The Basics</a></li>
-      <li><a href="/hula/responses">Responses</a></li>
-      <li><a href="/hula/nonsecure">Channel-Switching</a></li>
-      <li><a href="/hula/getname">Sessions</a></li>
+      <li><a href="basics">The Basics</a></li>
+      <li><a href="routing">Routing</a></li>
+      <li><a href="responses">Responses</a></li>
+      <li><a href="nonsecure">Channel-Switching</a></li>
+      <li><a href="getname">Sessions</a></li>
     </ul>

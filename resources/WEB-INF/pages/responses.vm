@@ -4,7 +4,7 @@
 	<div class="row">
 		<h1>Responses</h1>
 		<p>
-			Hula provides several commands for responding to requests.
+			Hula Web provides several commands for responding to requests.
 			<ul>
 				<li>SetView - a view should be rendered</li>
 				<li>ReturnContent - content from a variable should be returned</li>

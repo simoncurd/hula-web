@@ -1,1 +1,6 @@
+If $showage = "true"
+	Set age=32
+Else
+	Set age="Unknown"
+End
 SetView showname

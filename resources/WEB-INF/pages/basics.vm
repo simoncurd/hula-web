@@ -45,22 +45,30 @@ SetView welcome</pre>
 	<div class="row">
 		<h2>Request with parameters</h2>
 		<p>
-			For request  <code>/showname?name=Jeff</code>, request parameters are passed straight
-			through to the view, which renders the name.
+			For request  <code>/showname?name=Jeff&showage=true</code>, the request parameters are provided to
+			the script as variables. The resulting variable state is available to the view.
+		</p>
 		<p>
+			For reference, GET and POST requests are treated the same.   
+		</p>
 		<div class="span6">
 			<h4>scripts/showname.txt</h4>			
 			<pre class="prettyprint lang-sql">
-SetView showname</pre>
+If $showage = "true"
+   Set age=32
+Else
+   Set age="Unknown"
+End
+SetView showuser</pre>
 		</div>
 	
 		<div class="span6">
 
-			<h4>pages/showname.vm</h4>
+			<h4>pages/showuser.vm</h4>
 			<pre class="prettyprint">
 &lt;html&gt;
    &lt;body&gt;
-      Hello, $name
+      User is $name. Age is $age
    &lt;/body&gt;
 &lt;/html&gt;</pre>
 		</div>	

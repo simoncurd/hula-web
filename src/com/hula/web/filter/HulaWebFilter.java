@@ -36,11 +36,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.hula.web.WebConstants;
+import com.hula.web.model.Route;
 import com.hula.web.model.Script;
+import com.hula.web.service.routing.RouteService;
 import com.hula.web.service.script.ScriptService;
 import com.hula.web.service.script.exception.ScriptNotFoundException;
 import com.hula.web.service.script.exception.ScriptParseException;
-import com.hula.web.util.URLUtils;
 
 /**
  * Filter responsible for recognising Hula requests, as well as channel switching
@@ -54,11 +55,13 @@ public class HulaWebFilter implements Filter
 	private String httpPort = null;
 	private String httpsPort = null;
 	private ScriptService scriptService = null;
+	private RouteService routeService = null;
 
 	@Inject
-	public HulaWebFilter(ScriptService scriptService, @Named("http.port") String httpPort, @Named("https.port") String httpsPort)
+	public HulaWebFilter(ScriptService scriptService, RouteService routeService, @Named("http.port") String httpPort, @Named("https.port") String httpsPort)
 	{
 		this.scriptService = scriptService;
+		this.routeService = routeService;
 		this.httpPort = httpPort;
 		this.httpsPort = httpsPort;
 	}
@@ -71,13 +74,20 @@ public class HulaWebFilter implements Filter
 
 		String requestURL = request.getRequestURL().toString();
 		
-		String contextPath = request.getContextPath();
-		String scriptName = URLUtils.getScriptName(requestURL, contextPath);
+		//String contextPath = request.getContextPath();
+		//String scriptName = URLUtils.getScriptName(requestURL, contextPath);
+		String scriptName = request.getServletPath().substring(1);
 
 		// this filters out requests for non-hula resources
 		if (!scriptService.hasScript(scriptName))
 		{
-			return;
+			
+			Route route = routeService.getRoute(request.getServletPath());
+			if (route == null)
+			{
+				return;
+			}
+			scriptName = route.getScript();
 		}
 		logger.info("request [{}]", requestURL);
 		logger.info("script [{}]", scriptName);

@@ -29,6 +29,8 @@ import com.hula.web.response.RedirectProcessor;
 import com.hula.web.response.ResponseProcessor;
 import com.hula.web.response.ReturnContentProcessor;
 import com.hula.web.response.ShowPageProcessor;
+import com.hula.web.service.routing.RouteService;
+import com.hula.web.service.routing.RouteServiceImpl;
 import com.hula.web.service.script.ScriptService;
 import com.hula.web.service.script.ScriptServiceImpl;
 import com.hula.web.service.session.SessionService;
@@ -63,6 +65,7 @@ public class HulaWebServletModule extends ServletModule
 		// setup services
 		bind(SessionService.class).to(SessionServiceImpl.class);
 		bind(ScriptService.class).to(ScriptServiceImpl.class);
+		bind(RouteService.class).to(RouteServiceImpl.class);
 
 		// response processors
 		MapBinder<String, ResponseProcessor> responseProcessorMap = MapBinder.newMapBinder(binder(), String.class, ResponseProcessor.class);
