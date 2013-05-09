@@ -7,16 +7,16 @@
 			on the URL requested. Hula Web uses two mechanisms for routing requests, 
 			applied in the following order:
 			<ul>
-				<li>By script name - the URL requested matches the name of a script</li>
-				<li>By mapping rule - a set of rules which map URLs to scripts </li> 
+				<li>Path-based routing - the path of the URL matches a script in the script folder</li>
+				<li>Rule-based routing - the path of the URL matches a routing rule</li> 
 			</ul>
 		</p>
 	</div>
 	<hr/>
 	<div class="row">
-		<h2>Script name routing</h2>
+		<h2>Simple path-based routing</h2>
 		<p>
-			At the most basic level, to service a request to <code>/helloworld</code>, 
+			At the most basic level, to service a request with path <code>/helloworld</code>, 
 			Hula Web checks the <code>/scripts</code> folder
 			for <code>helloworld.txt</code>, finds a match, and executes the script
 		<p>
@@ -41,18 +41,18 @@ SetView welcome</pre>
 	<hr/>
 
 	<div class="row">
-		<h2>Scripts in folders</h2>
+		<h2>Path-based routing with segments</h2>
 		<p>
-			Scripts stored in folders can be called by including the
-			folder name in the URL. In this example, requests to <code>/greeting/helloworld</code> 
-			will be serviced by a script in <code>/scripts/greeting/helloworld.txt</code>.
-		<p>
-		<p>
-			This may be used to achieve a specific URL structure, or simply to 
-			group scripts.
+			For request URLs that contain a segmented path (<code>/these/are/segments</code>),
+			Hula Web expects a nested folder structure containing the named script (the last
+			segment in the path). 
 		</p>
+		<p>
+			In this example, requests to <code>/greeting/message/helloworld</code> 
+			will be serviced by a script in <code>/scripts/greeting/message/helloworld.txt</code>.
+		<p>
 		<div class="span6">
-			<h4>scripts/greeting/helloworld.txt</h4>			
+			<h4>scripts/greeting/message/helloworld.txt</h4>			
 			<pre class="prettyprint lang-sql">
 SetView welcome</pre>
 		</div>
@@ -71,5 +71,94 @@ SetView welcome</pre>
 	</div>
 	<hr/>
 
+	<div class="row">
+		<h2>Rule-based routing</h2>
+		<p>
+			An alternative to path-based routing is a rule-based
+			approach. Rules are defined in <code>/scripts/routing.properties</code>. 
+			They specify a URL path to match against and the script to execute,
+			in the form <code>/path/based/resource=script</code>
+		</p>
+		<p>
+			The below example shows routing rules for a fashion website. These rules
+			allow the website to provide clean, SEO-friendly URLs for different
+			categories of products, all serviced by the same script. 
+		<p>
+		<p>
+			So, a request for <code>/jackets</code> is mapped to the <code>/scripts/category.txt</code>
+			script, which handles the request and shows the <code>/pages/category.vm</code> page.
+		<p>
+		<div class="span6">
+			<h4>scripts/routing.properties</h4>			
+			<pre class="prettyprint lang-sql">
+/jackets=category
+/shoes=category</pre>
 
+			<h4>scripts/category.txt</h4>			
+			<pre class="prettyprint lang-sql">
+# get the URL path i.e. /shoes/boots
+GetURLPath as urlPath
+
+GetCategory path=$urlPath as category
+
+SetView category</pre>
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/category.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      &lt;h1&gt;$category.name&lt;/h1&gt;
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+		</div>	
+		
+	</div>
+	<hr/>
+
+
+	<div class="row">
+		<h2>Wildcard rules</h2>
+		<p>
+			Hula Web routing rules support the use of wildcards when specifying
+			a mapping, to allow multiple URL paths to be matched by a single rule. 
+		</p>
+		<p>
+			The example below provides examples of rules that an ecommerce site may use,
+			which map requests for <code>/shoes</code> and <code>/shoes/boots</code>
+			to the category page, without mapping <code>/shoes-for-summer</code>
+		</p>
+		<div class="span6">
+			<h4>scripts/routing.properties</h4>			
+			<pre style="border: 1px solid #888">
+/shoes=category
+/shoes/*=category</pre>
+
+
+		</div>
+	</div>
+	<div class="row">
+		<p>
+			Hula Web routing rules support the use of wildcards when specifying
+			a mapping, to allow multiple URL paths to be matched by a single rule. 
+		</p>
+		<p>
+			The example below provides examples of rules that an ecommerce site may use,
+			which map requests for <code>/shoes</code> and <code>/shoes/boots</code>
+			to the category page, without mapping <code>/shoes-for-summer</code>
+		</p>
+		<div class="span6">
+			<h4>scripts/routing.properties</h4>			
+			<pre style="border: 1px solid #888">
+/shoes=category
+/shoes/*=category</pre>
+
+
+		</div>
+	</div>
+	
+	
+	<hr/>
 #end

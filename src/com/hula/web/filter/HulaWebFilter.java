@@ -73,9 +73,6 @@ public class HulaWebFilter implements Filter
 		HttpServletResponse response = (HttpServletResponse) baseResponse;
 
 		String requestURL = request.getRequestURL().toString();
-		
-		//String contextPath = request.getContextPath();
-		//String scriptName = URLUtils.getScriptName(requestURL, contextPath);
 		String scriptName = request.getServletPath().substring(1);
 
 		// this filters out requests for non-hula resources
@@ -85,6 +82,7 @@ public class HulaWebFilter implements Filter
 			Route route = routeService.getRoute(request.getServletPath());
 			if (route == null)
 			{
+				fc.doFilter(baseRequest, baseResponse);
 				return;
 			}
 			scriptName = route.getScript();
