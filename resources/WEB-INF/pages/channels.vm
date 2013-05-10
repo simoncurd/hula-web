@@ -1,0 +1,39 @@
+#decorate("layout.vm")
+
+
+	<div class="row">
+		<h1>Channel-switching</h1>
+		<p>
+			Hula Web can automatically redirect between http/https schemes based
+			on the script configuration. 
+			Scripts requiring a secure channel are configured in 
+			the <code>scripts/secure.properties</code> file.
+		</p>		
+	</div>
+
+	<hr/>
+	<div class="row">
+		<h2>Example</h2>
+		<p>
+			In the following example, requests to <code>/login</code> and 
+			<code>/checkout</code> will be serviced securely. If the initial 
+			request is send with the http scheme, the request will be redirected 
+			to the https scheme. Conversely, requests using the https
+			scheme for scripts which do not feature in this file will be 
+			redirected to the http scheme.
+		<p>
+		<div class="span6">
+			<h4>scripts/secure.properties</h4>			
+			<pre class="prettyprint lang-sql">
+#
+# scripts which should be accessed securely
+#
+login
+checkout</pre>
+		</div>
+	
+		
+	</div>
+
+
+#end

@@ -1,6 +1,0 @@
-
-GetSession as session
-
-Set name=$session.name
-
-SetView getname

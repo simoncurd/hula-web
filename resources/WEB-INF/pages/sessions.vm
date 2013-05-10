@@ -1,0 +1,64 @@
+#decorate("layout.vm")
+
+	<div class="row">
+		<h1>Sessions</h1>
+		<p>
+			Hula Web provides support for creating and accessing user sessions using the following commands:
+		</p>
+		<ul>
+			<li>GetSession - Lookup/create the user session</li>
+			<li>SaveSession - Save the user session</li>
+			<li>DeleteSession - Clear the user session</li>
+		</ul>
+	
+	</div>
+
+
+	<hr/>
+	<div class="row">
+		<h2>Using Sessions</h2>
+		<p>
+			In the following example, requests for <code>/getname</code> do the following:
+			<ul>
+				<li>The <code>/scripts/getname.txt</code> script checks the session for the <code>name</code> property, and renders <code>/pages/showname.vm</code> page.</li>
+				<li>The <code>/pages/showname.vm</code> page displays the name (or void, if no name is stored). The user is provided a form for setting the name. </li>
+				<li>Submitting the form sends the name to the <code>/scripts/setname.txt</code> script, which stores it in the session and redirects to the <code>/scripts/getname.txt</code> script. </li>
+			</ul>
+			This also provides an example of the <a href="http://en.wikipedia.org/wiki/Post/Redirect/Get" target="_blank">Post-Redirect-Get</a> pattern. 
+		</p>
+		<div class="span6">
+			<h4>scripts/getname.txt</h4>			
+			<pre class="prettyprint lang-sql">
+GetSession as session
+Set name=$session.name
+
+SetView showname</pre>
+
+			<h4>scripts/setname.txt</h4>			
+			<pre class="prettyprint lang-sql">
+
+GetSession as session
+Set $session.name=$name
+SaveSession
+
+Redirect getname</pre>
+
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/showname.vm</h4>
+			<pre class="prettyprint">
+The name in the session is: $name
+&lt;br/&gt;
+
+Set a new name in the session:
+&lt;form action=&quot;setname&quot; action=&quot;post&quot;&gt;
+   Name: &lt;input name=&quot;name&quot; type=&quot;text&quot;/&gt;
+   &lt;input type=&quot;submit&quot; value=&quot;Save&quot;/&gt;
+&lt;/form&gt;</pre>
+		</div>	
+		
+	</div>
+
+#end

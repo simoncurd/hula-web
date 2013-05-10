@@ -1,7 +1,0 @@
-If $age < 18
-	Forward noway
-Else
-	Forward whynot
-End
-
-SetView welcome

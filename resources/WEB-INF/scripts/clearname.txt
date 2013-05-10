@@ -1,3 +1,0 @@
-DeleteSession
-
-Redirect getname

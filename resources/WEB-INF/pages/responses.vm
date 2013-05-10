@@ -8,8 +8,8 @@
 			<ul>
 				<li>SetView - a view should be rendered</li>
 				<li>ReturnContent - content from a variable should be returned</li>
-				<li>Forward - forward the request to another Hula script</li>
-				<li>Redirect - redirect the request to another Hula script or URL</li>
+				<li>Forward - forward the request to another script</li>
+				<li>Redirect - redirect the request to another script or URL</li>
 			</ul>
 		</p>
 	</div>

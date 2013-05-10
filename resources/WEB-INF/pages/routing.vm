@@ -85,14 +85,15 @@ SetView welcome</pre>
 			categories of products, all serviced by the same script. 
 		<p>
 		<p>
-			So, a request for <code>/jackets</code> is mapped to the <code>/scripts/category.txt</code>
+			So, a request for <code>/shoes/boots</code> is mapped to the <code>/scripts/category.txt</code>
 			script, which handles the request and shows the <code>/pages/category.vm</code> page.
 		<p>
 		<div class="span6">
 			<h4>scripts/routing.properties</h4>			
 			<pre class="prettyprint lang-sql">
 /jackets=category
-/shoes=category</pre>
+/shoes=category
+/shoes/boots=category</pre>
 
 			<h4>scripts/category.txt</h4>			
 			<pre class="prettyprint lang-sql">
@@ -128,7 +129,7 @@ SetView category</pre>
 		<p>
 			The example below provides examples of rules that an ecommerce site may use,
 			which map requests for <code>/shoes</code> and <code>/shoes/boots</code>
-			to the category page, without mapping <code>/shoes-for-summer</code>
+			to the category page, without matching requests for URL path <code>/shoes-for-summer</code>
 		</p>
 		<div class="span6">
 			<h4>scripts/routing.properties</h4>			
@@ -141,19 +142,15 @@ SetView category</pre>
 	</div>
 	<div class="row">
 		<p>
-			Hula Web routing rules support the use of wildcards when specifying
-			a mapping, to allow multiple URL paths to be matched by a single rule. 
+			This example demonstrates a routing rule for a search-engine friendly URLs.
+			It will map requests for <code>/latest-gadgets-live/event/123</code>
+			to the <code>/scripts/events.txt</code> script.
 		</p>
-		<p>
-			The example below provides examples of rules that an ecommerce site may use,
-			which map requests for <code>/shoes</code> and <code>/shoes/boots</code>
-			to the category page, without mapping <code>/shoes-for-summer</code>
-		</p>
+
 		<div class="span6">
 			<h4>scripts/routing.properties</h4>			
 			<pre style="border: 1px solid #888">
-/shoes=category
-/shoes/*=category</pre>
+/*/event/*=events</pre>
 
 
 		</div>
