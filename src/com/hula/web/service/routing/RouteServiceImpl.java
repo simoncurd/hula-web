@@ -41,9 +41,10 @@ public class RouteServiceImpl implements RouteService
 	{
 		this.scriptPath = scriptPath;
 
+		InputStream in = null;
 		try
 		{
-			InputStream in = FileUtil.getFileInputStream(scriptPath + "/routing.properties");
+			in = FileUtil.getFileInputStream(scriptPath + "/routing.properties");
 
 			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 			String line = null;
@@ -62,6 +63,17 @@ public class RouteServiceImpl implements RouteService
 		catch (IOException e)
 		{
 			throw new RuntimeException("error loading hula routes", e);
+		}
+		finally
+		{
+			try
+			{
+				in.close();
+			}
+			catch (Throwable t)
+			{
+				// swallow exception
+			}
 		}
 
 	}
