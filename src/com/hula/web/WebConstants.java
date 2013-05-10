@@ -21,4 +21,5 @@ package com.hula.web;
 public class WebConstants
 {
 	public static final String ScriptName = "h_ScriptName";
+	public static final String ServletPath = "h_ServletPath";
 }

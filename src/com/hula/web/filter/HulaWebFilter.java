@@ -119,6 +119,7 @@ public class HulaWebFilter implements Filter
 
 		// forward to the servlet
 		request.setAttribute(WebConstants.ScriptName, scriptName);
+		request.setAttribute(WebConstants.ServletPath, request.getServletPath());
 		RequestDispatcher rd = request.getRequestDispatcher("/exec");
 		rd.forward(baseRequest, baseResponse);
 	}
