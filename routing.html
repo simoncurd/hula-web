@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Hula Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="bootstrap-2.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap-2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../assets/js/html5shiv.js"></script>
+    <![endif]-->
+    
+    <link href="google-code-prettify/prettify.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="index.html">Hula Web</a>
+          <div class="nav-collapse collapse">
+			
+
+    <ul class="nav">
+      <li><a href="basics.html">The Basics</a></li>
+      <li><a href="routing.html">Routing</a></li>
+      <li><a href="responses.html">Responses</a></li>
+      <li><a href="channels.html">Channel-Switching</a></li>
+      <li><a href="sessions.html">Sessions</a></li>
+    </ul>          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+    	
+	<div class="row">
+		<h1>Routing</h1>
+		<p>
+			Routing is the mechanism which determines which script is run, based 
+			on the URL requested. Hula Web uses two mechanisms for routing requests, 
+			applied in the following order:
+			<ul>
+				<li>Path-based routing - the path of the URL matches a script in the script folder</li>
+				<li>Rule-based routing - the path of the URL matches a routing rule</li> 
+			</ul>
+		</p>
+	</div>
+	<hr/>
+	<div class="row">
+		<h2>Simple path-based routing</h2>
+		<p>
+			At the most basic level, to service a request with path <code>/helloworld</code>, 
+			Hula Web checks the <code>/scripts</code> folder
+			for <code>helloworld.txt</code>, finds a match, and executes the script
+		<p>
+		<div class="span6">
+			<h4>scripts/helloworld.txt</h4>			
+			<pre class="prettyprint lang-sql">
+SetView welcome</pre>
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/helloworld.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      Hello, World!
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+		</div>	
+		
+	</div>
+	<hr/>
+
+	<div class="row">
+		<h2>Path-based routing with segments</h2>
+		<p>
+			For request URLs that contain a segmented path (<code>/these/are/segments</code>),
+			Hula Web expects a nested folder structure containing the named script (the last
+			segment in the path). 
+		</p>
+		<p>
+			In this example, requests to <code>/greeting/message/helloworld</code> 
+			will be serviced by a script in <code>/scripts/greeting/message/helloworld.txt</code>.
+		<p>
+		<div class="span6">
+			<h4>scripts/greeting/message/helloworld.txt</h4>			
+			<pre class="prettyprint lang-sql">
+SetView welcome</pre>
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/helloworld.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      Hello, World!
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+		</div>	
+		
+	</div>
+	<hr/>
+
+	<div class="row">
+		<h2>Rule-based routing</h2>
+		<p>
+			An alternative to path-based routing is a rule-based
+			approach. Rules are defined in <code>/scripts/routing.properties</code>. 
+			They specify a URL path to match against and the script to execute,
+			in the form <code>/path/based/resource=script</code>
+		</p>
+		<p>
+			The below example shows routing rules for a fashion website. These rules
+			allow the website to provide clean, SEO-friendly URLs for different
+			categories of products, all serviced by the same script. 
+		<p>
+		<p>
+			So, a request for <code>/shoes/boots</code> is mapped to the <code>/scripts/category.txt</code>
+			script, which handles the request and shows the <code>/pages/category.vm</code> page.
+		<p>
+		<div class="span6">
+			<h4>scripts/routing.properties</h4>			
+			<pre class="prettyprint lang-sql">
+/jackets=category
+/shoes=category
+/shoes/boots=category</pre>
+
+			<h4>scripts/category.txt</h4>			
+			<pre class="prettyprint lang-sql">
+# get the URL path i.e. /shoes/boots
+GetURLPath as urlPath
+
+GetCategory path=$urlPath as category
+
+SetView category</pre>
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/category.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      &lt;h1&gt;$category.name&lt;/h1&gt;
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+		</div>	
+		
+	</div>
+	<hr/>
+
+
+	<div class="row">
+		<h2>Wildcard rules</h2>
+		<p>
+			Hula Web routing rules support the use of wildcards when specifying
+			a mapping, to allow multiple URL paths to be matched by a single rule. 
+		</p>
+		<p>
+			The example below provides examples of rules that an ecommerce site may use,
+			which map requests for <code>/shoes</code> and <code>/shoes/boots</code>
+			to the category page, without matching requests for URL path <code>/shoes-for-summer</code>
+		</p>
+		<div class="span6">
+			<h4>scripts/routing.properties</h4>			
+			<pre style="border: 1px solid #888">
+/shoes=category
+/shoes/*=category</pre>
+
+
+		</div>
+	</div>
+	<div class="row">
+		<p>
+			This example demonstrates a routing rule for a search-engine friendly URLs.
+			It will map requests for <code>/latest-gadgets-live/event/123</code>
+			to the <code>/scripts/events.txt</code> script.
+		</p>
+
+		<div class="span6">
+			<h4>scripts/routing.properties</h4>			
+			<pre style="border: 1px solid #888">
+/*/event/*=events</pre>
+
+
+		</div>
+	</div>
+	
+	
+	<hr/>
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="bootstrap-2.3.1/js/bootstrap.min.js"></script>
+	<script src="google-code-prettify/run_prettify.js"></script>
+
+  </body>
+</html>
+

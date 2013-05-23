@@ -1,0 +1,17 @@
+com.hula.web
+com.hula.web.commands.request
+com.hula.web.commands.results
+com.hula.web.commands.session
+com.hula.web.filter
+com.hula.web.listener
+com.hula.web.model
+com.hula.web.model.runresult
+com.hula.web.response
+com.hula.web.runtime
+com.hula.web.service.routing
+com.hula.web.service.script
+com.hula.web.service.script.exception
+com.hula.web.service.session
+com.hula.web.servlet
+com.hula.web.util
+com.hula.web.velocity

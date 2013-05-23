@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Hula Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="bootstrap-2.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap-2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../assets/js/html5shiv.js"></script>
+    <![endif]-->
+    
+    <link href="google-code-prettify/prettify.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="index.html">Hula Web</a>
+          <div class="nav-collapse collapse">
+			
+
+    <ul class="nav">
+      <li><a href="basics.html">The Basics</a></li>
+      <li><a href="routing.html">Routing</a></li>
+      <li><a href="responses.html">Responses</a></li>
+      <li><a href="channels.html">Channel-Switching</a></li>
+      <li><a href="sessions.html">Sessions</a></li>
+    </ul>          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+    	
+
+	<div class="row">
+		<h1>Responses</h1>
+		<p>
+			Hula Web provides several commands for responding to requests.
+			<ul>
+				<li>SetView - a view should be rendered</li>
+				<li>ReturnContent - content from a variable should be returned</li>
+				<li>Forward - forward the request to another script</li>
+				<li>Redirect - redirect the request to another script or URL</li>
+			</ul>
+		</p>
+	</div>
+
+	<hr/>
+	<div class="row">
+		<h2>Rendering a page</h2>
+		<p>
+			For request  <code>/freebeer?age=20</code>, the script decides which page to render depending on the age parameter.
+		<p>
+		<div class="span6">
+			<h4>scripts/freebeer.txt</h4>			
+			<pre class="prettyprint lang-sql">
+If $age < $legallimit
+   SetView tooyoung
+Else
+   SetView whynot
+End</pre>
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/tooyoung.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      Free Beer? Sorry, I'm afraid you're too young.
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+
+		
+			<h4>pages/whynot.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      Free Beer? Why not!
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+		</div>	
+				
+	</div>
+
+	<hr/>
+	<div class="row">
+		<h2>Returning content</h2>
+		<p>
+			For request <code>/freebeer?age=32</code>, the script decides which message
+			is appropriate, adds this to a map, converts this to a Json string 
+			and returns this to the user. The response
+			is <code>{"message":"why not"}</code> 
+		<p>
+		<div class="span6">
+			<h4>scripts/freebeer.txt</h4>			
+			<pre class="prettyprint lang-sql">
+NewMap as result
+If $age < $legallimit
+   Set $result.message="sorry, too young"
+Else
+   Set $result.message="why not"
+End
+MapToJson $result as resultJson
+ReturnContent $resultJson
+</pre>
+	
+		</div>	
+				
+	</div>
+
+
+
+	<hr/>
+	<div class="row">
+		<h2>Forwarding the request</h2>
+		<p>
+			For request  <code>/freebeer?age=20</code>, the script forwards the request
+			to either <code>scripts/tooyoung.txt</code> or <code>scripts/whynot.txt</code>,
+			depending on the age provided. Both scripts set an appropriate message and
+			render the same view. The view displays the message provided.
+		<p>
+		<div class="span6">
+			<h4>scripts/freebeer.txt</h4>			
+			<pre class="prettyprint lang-sql">
+If $age < $legallimit
+   Forward tooyoung
+Else
+   Forward whynot
+End</pre>
+
+			<h4>scripts/tooyoung.txt</h4>			
+			<pre class="prettyprint lang-sql">
+Set message="sorry, too young"
+SetView beermessage</pre>
+
+			<h4>scripts/whynot.txt</h4>			
+			<pre class="prettyprint lang-sql">
+Set message="hey, why not?"
+SetView beermessage</pre>
+
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/beermessage.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      Free Beer? $message
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+
+		
+		</div>	
+				
+	</div>
+
+	<hr/>
+	<div class="row">
+		<h2>Sending a redirect</h2>
+		<p>
+			An alternative to forwarding, this example shows how a request for
+			 <code>/freebeer?age=20</code> is redirected 
+			to either <code>scripts/tooyoung.txt</code> or <code>scripts/whynot.txt</code>,
+			depending on the age provided. Both scripts set an appropriate message and
+			render the same view. The view displays the message provided.
+			<br/>
+			The primary difference between Redirect and Forward is:
+			<ul>
+				<li>Forward is handled internally, so the URL
+					doesn't change.</li>
+				<li>Redirect sends a response to the users browser
+					redirecting them to an alternative URL, which is shown in the address bar.</li>
+			</ul>
+			
+		<p>
+		<div class="span6">
+			<h4>scripts/freebeer.txt</h4>			
+			<pre class="prettyprint lang-sql">
+If $age < $legallimit
+   Redirect tooyoung
+Else
+   Redirect whynot
+End</pre>
+
+			<h4>scripts/tooyoung.txt</h4>			
+			<pre class="prettyprint lang-sql">
+Set message="sorry, too young"
+SetView beermessage</pre>
+
+			<h4>scripts/whynot.txt</h4>			
+			<pre class="prettyprint lang-sql">
+Set message="hey, why not?"
+SetView beermessage</pre>
+
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/beermessage.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      Free Beer? $message
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+
+		
+		</div>	
+				
+	</div>
+
+
+
+
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="bootstrap-2.3.1/js/bootstrap.min.js"></script>
+	<script src="google-code-prettify/run_prettify.js"></script>
+
+  </body>
+</html>
+
