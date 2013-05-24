@@ -1,0 +1,116 @@
+#decorate("layout.vm")
+
+	<div class="row">
+		<h1>The Basics</h1>
+		<p>
+			Hula Web combines the <a href="https://github.com/simoncurd/hula-lang" target="_blank">Hula Scripting Language</a> 
+			with the <a href="http://velocity.apache.org/" target="_blank">Velocity template engine</a>.
+		</p>
+	</div>
+	<div class="row">
+		A request to a Hula Web application is serviced by two files: A script and a page.
+		<ul>
+			<li>The script controls the request, reading request parameters, calling services, handling the session and 
+			specifying page flow.</li>
+			<li>The page is a template which is used to render the view.</li>  
+		</ul>
+	</div>
+	<hr/>
+	<div class="row">
+		<h2>Simple request</h2>
+		<p>
+			This example shows how a request to <code>/helloworld</code> is serviced. The script
+			specifies the page to display with <code>SetView helloworld</code>. The page is written in plain
+			old HTML.
+		<p>
+		<div class="span6">
+			<h4>scripts/helloworld.txt</h4>			
+			<pre class="prettyprint lang-sql">
+SetView welcome</pre>
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/helloworld.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      Hello, World!
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+		</div>	
+		
+	</div>
+	<hr/>
+	<div class="row">
+		<h2>Request with parameters</h2>
+		<p>
+			For request  <code>/showname?name=Jeff&showage=true</code>, the request parameters are provided to
+			the script as variables. The resulting variable state is available to the view.
+		</p>
+		<p>
+			For reference, GET and POST requests are treated the same.   
+		</p>
+		<div class="span6">
+			<h4>scripts/showname.txt</h4>			
+			<pre class="prettyprint lang-sql">
+If $showage = "true"
+   Set age=32
+Else
+   Set age="Unknown"
+End
+SetView showuser</pre>
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/showuser.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      User is $name. Age is $age
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+		</div>	
+		
+	</div>
+
+	<hr/>
+	<div class="row">
+		<h2>Calling other scripts</h2>
+		<p>
+			For request  <code>/shownames</code>, the <code>shownames.txt</code> script calls the <code>namelist.txt</code>
+			script to build the list, then specifies the view for Velocity to render. Velocity iterates over the list
+			items. 
+		<p>
+		<div class="span6">
+		
+			<h4>scripts/shownames.txt</h4>			
+			<pre class="prettyprint lang-sql">
+Call namelist
+SetView shownames</pre>		
+			<h4>scripts/namelist.txt</h4>			
+			<pre class="prettyprint lang-sql">
+NewList as names
+AddToList $names, value="Jeff"
+AddToList $names, value="John"
+AddToList $names, value="Jim"</pre>
+		</div>
+	
+		<div class="span6">
+
+			<h4>pages/showname.vm</h4>
+			<pre class="prettyprint">
+&lt;html&gt;
+   &lt;body&gt;
+      &lt;ul&gt;
+         &#35;foreach ($name in $names)
+            &lt;li&gt;$name&lt;/li&gt;
+         &#35;end
+      &lt;/ul&gt;
+   &lt;/body&gt;
+&lt;/html&gt;</pre>
+		</div>	
+		
+	</div>
+#end
