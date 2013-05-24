@@ -23,6 +23,7 @@ A war file is provided in the /release folder which can be dropped straight into
 
 Once deployed:
 * The homepage for hula can be reached at [http://localhost:8080/hula/welcome](http://localhost:8080/hula/welcome) (Assuming out-the-box Tomcat configuration).
+* [Manual](http://simoncurd.github.io/hula-web/) and [Javadocs](http://simoncurd.github.io/hula-web/javadoc)
 
 # Latest Version
 
